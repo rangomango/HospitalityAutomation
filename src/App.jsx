@@ -1,41 +1,49 @@
 import { useState } from 'react';
-import { Settings, Users, User } from 'lucide-react';
+import { Users, User, Wrench, X } from 'lucide-react';
 import { useStore, selectors } from './store/useStore';
 import SetupView from './views/SetupView';
 import StaffView from './views/StaffView';
 import GuestView from './views/GuestView';
 
 const TABS = [
-  { id: 'setup', label: 'Setup',    Icon: Settings },
-  { id: 'staff', label: 'Staff',    Icon: Users    },
-  { id: 'guest', label: 'Guest',    Icon: User     },
+  { id: 'staff', label: 'Staff', Icon: Users },
+  { id: 'guest', label: 'Guest', Icon: User  },
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('setup');
+  const [activeTab, setActiveTab] = useState('staff');
+  const [showSetup, setShowSetup] = useState(false);
   const unread = useStore(selectors.unreadCount);
 
   return (
-    <div className="flex flex-col h-screen bg-slate-50">
+    <div className="flex flex-col h-screen bg-slate-50 relative">
       {/* Header */}
       <header className="bg-brand-600 text-white px-4 pt-10 pb-3 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🏨</span>
-          <div>
-            <h1 className="font-bold text-lg leading-tight">Hotel Supply Hub</h1>
-            <p className="text-brand-100 text-xs">Supply Management Prototype</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🏨</span>
+            <div>
+              <h1 className="font-bold text-lg leading-tight">Hotel Supply Hub</h1>
+              <p className="text-brand-100 text-xs">Supply Management Prototype</p>
+            </div>
           </div>
+          <button
+            onClick={() => setShowSetup(true)}
+            className="p-2 rounded-xl bg-brand-500 hover:bg-brand-400 transition-colors"
+            aria-label="Open setup"
+          >
+            <Wrench size={20} />
+          </button>
         </div>
       </header>
 
       {/* Main content */}
       <main className="flex-1 overflow-hidden">
-        {activeTab === 'setup' && <SetupView />}
         {activeTab === 'staff' && <StaffView />}
         {activeTab === 'guest' && <GuestView />}
       </main>
 
-      {/* Footer navigation */}
+      {/* Footer navigation — Staff & Guest only */}
       <nav className="bg-white border-t border-slate-200 flex-shrink-0 safe-bottom">
         <div className="flex">
           {TABS.map(({ id, label, Icon }) => {
@@ -67,6 +75,28 @@ export default function App() {
           })}
         </div>
       </nav>
+
+      {/* Setup overlay */}
+      {showSetup && (
+        <div className="absolute inset-0 z-50 flex flex-col bg-slate-50">
+          <div className="bg-brand-700 text-white px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <Wrench size={18} />
+              <h2 className="font-bold text-lg">Hotel Setup</h2>
+            </div>
+            <button
+              onClick={() => setShowSetup(false)}
+              className="p-2 rounded-xl bg-brand-600 hover:bg-brand-500 transition-colors"
+              aria-label="Close setup"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <SetupView />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

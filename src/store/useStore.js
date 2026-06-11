@@ -231,6 +231,9 @@ export const useStore = create(
       clearNotification(id) {
         set(s => ({ notifications: s.notifications.filter(n => n.id !== id) }));
       },
+      clearAllNotifications() {
+        set({ notifications: [] });
+      },
 
       // ─── Conflict Detection ───────────────────────────────────────────────
       _checkConflicts() {

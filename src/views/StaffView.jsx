@@ -130,6 +130,7 @@ export default function StaffView() {
   const tasks = useStore(s => s.tasks);
   const notifications = useStore(s => s.notifications);
   const markAllRead = useStore(s => s.markAllRead);
+  const clearAllNotifications = useStore(s => s.clearAllNotifications);
   const unread = useStore(selectors.unreadCount);
 
   const activeTasks = tasks.filter(t => t.status !== 'completed').sort((a, b) => a.createdAt - b.createdAt);
@@ -183,13 +184,20 @@ export default function StaffView() {
 
         {tab === 'notifs' && (
           <>
-            {unread > 0 && (
-              <button
-                onClick={markAllRead}
-                className="w-full text-xs text-brand-600 font-semibold mb-3 text-right"
-              >
-                Mark all read
-              </button>
+            {notifications.length > 0 && (
+              <div className="flex items-center justify-between mb-3">
+                {unread > 0 ? (
+                  <button onClick={markAllRead} className="text-xs text-brand-600 font-semibold">
+                    Mark all read
+                  </button>
+                ) : <span />}
+                <button
+                  onClick={clearAllNotifications}
+                  className="text-xs text-red-500 font-semibold"
+                >
+                  Clear all
+                </button>
+              </div>
             )}
             {notifications.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 text-slate-400">
