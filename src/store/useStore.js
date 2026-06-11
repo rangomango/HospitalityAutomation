@@ -1,0 +1,291 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+const initialState = {
+  events: [],
+  // { id, name, type, date, startTime, bufferHours, rooms: [roomId,...] }
+
+  supplyUnits: [],
+  // { id, typeId, floor, location: 'closet'|roomId, status: 'available'|'in_transit'|'checked_out' }
+
+  tasks: [],
+  // { id, type:'forward_deploy'|'deliver'|'retrieve', label, supplyUnitIds, fromFloor, fromLocation, toFloor, toLocation, status:'pending'|'accepted'|'completed', staffId, requestId, deadline, createdAt }
+
+  requests: [],
+  // { id, guestRoom, floor, typeId, status:'pending'|'assigned'|'delivered'|'returned', taskId, requestedAt, deliveredAt, reminderSent }
+
+  notifications: [],
+  // { id, type:'task'|'request'|'conflict'|'reminder', message, read, createdAt }
+
+  guestRoom: null,
+  currentMapFloor: 1,
+};
+
+export const useStore = create(
+  persist(
+    (set, get) => ({
+      ...initialState,
+
+      // ─── Events ───────────────────────────────────────────────────────────
+      addEvent(data) {
+        const event = { ...data, id: uid(), createdAt: Date.now() };
+        set(s => ({ events: [...s.events, event] }));
+        get()._checkConflicts();
+        return event.id;
+      },
+      removeEvent(id) {
+        set(s => ({ events: s.events.filter(e => e.id !== id) }));
+      },
+      updateEvent(id, data) {
+        set(s => ({ events: s.events.map(e => e.id === id ? { ...e, ...data } : e) }));
+        get()._checkConflicts();
+      },
+
+      // ─── Supply Inventory ─────────────────────────────────────────────────
+      addSupplyUnits(typeId, quantity, floor) {
+        const units = Array.from({ length: quantity }, () => ({
+          id: uid(), typeId, floor, location: 'closet', status: 'available',
+        }));
+        set(s => ({ supplyUnits: [...s.supplyUnits, ...units] }));
+        get()._checkConflicts();
+      },
+      removeSupplyUnits(typeId, quantity, floor) {
+        set(s => {
+          const removable = s.supplyUnits
+            .filter(u => u.typeId === typeId && u.floor === floor && u.status === 'available')
+            .slice(0, quantity)
+            .map(u => u.id);
+          return { supplyUnits: s.supplyUnits.filter(u => !removable.includes(u.id)) };
+        });
+        get()._checkConflicts();
+      },
+      _updateUnit(unitId, updates) {
+        set(s => ({
+          supplyUnits: s.supplyUnits.map(u => u.id === unitId ? { ...u, ...updates } : u),
+        }));
+      },
+
+      // ─── Tasks ────────────────────────────────────────────────────────────
+      _createTask(task) {
+        const t = { ...task, id: uid(), status: 'pending', createdAt: Date.now() };
+        set(s => ({ tasks: [...s.tasks, t] }));
+        get()._notify({ type: 'task', message: task.label });
+        return t.id;
+      },
+      acceptTask(taskId) {
+        set(s => ({
+          tasks: s.tasks.map(t => t.id === taskId ? { ...t, status: 'accepted' } : t),
+        }));
+      },
+      completeTask(taskId) {
+        const { tasks, supplyUnits, requests } = get();
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        // Move supply units to new location
+        const updatedUnits = supplyUnits.map(u => {
+          if (!task.supplyUnitIds.includes(u.id)) return u;
+          const newStatus = task.toLocation === 'closet' ? 'available' : 'checked_out';
+          return { ...u, floor: task.toFloor, location: task.toLocation, status: newStatus };
+        });
+
+        // Update linked request
+        const updatedRequests = requests.map(r => {
+          if (r.id !== task.requestId) return r;
+          return {
+            ...r,
+            status: task.type === 'deliver' ? 'delivered' : task.type === 'retrieve' ? 'returned' : r.status,
+            deliveredAt: task.type === 'deliver' ? Date.now() : r.deliveredAt,
+          };
+        });
+
+        set(s => ({
+          tasks: s.tasks.map(t => t.id === taskId ? { ...t, status: 'completed', completedAt: Date.now() } : t),
+          supplyUnits: updatedUnits,
+          requests: updatedRequests,
+        }));
+      },
+
+      // Create forward-deploy tasks from deploy plan
+      createDeployTasks(plans) {
+        const { supplyUnits } = get();
+        plans.forEach(plan => {
+          if (plan.canFulfill <= 0) return;
+          const units = supplyUnits
+            .filter(u => u.typeId === plan.typeId && u.status === 'available' && u.floor !== plan.toFloor)
+            .slice(0, plan.canFulfill);
+          if (!units.length) return;
+
+          const taskId = get()._createTask({
+            type: 'forward_deploy',
+            label: `Deploy ${plan.canFulfill}x ${SUPPLY_TYPE_MAP[plan.typeId]?.name} → Floor ${plan.toFloor} (${plan.eventName})`,
+            supplyUnitIds: units.map(u => u.id),
+            fromFloor: units[0].floor,
+            fromLocation: 'closet',
+            toFloor: plan.toFloor,
+            toLocation: 'closet',
+            deadline: plan.deadline,
+            requestId: null,
+          });
+
+          // Mark units in transit
+          units.forEach(u => get()._updateUnit(u.id, { status: 'in_transit' }));
+        });
+      },
+
+      // ─── Guest Requests ───────────────────────────────────────────────────
+      createRequest(guestRoom, floor, typeId) {
+        const { supplyUnits } = get();
+        const unit = supplyUnits.find(
+          u => u.typeId === typeId && u.floor === floor && u.location === 'closet' && u.status === 'available'
+        );
+        if (!unit) return { error: 'No available units on this floor' };
+
+        const reqId = uid();
+        const request = {
+          id: reqId, guestRoom, floor, typeId,
+          status: 'pending', taskId: null,
+          requestedAt: Date.now(), deliveredAt: null, reminderSent: false,
+        };
+
+        const taskId = get()._createTask({
+          type: 'deliver',
+          label: `Deliver ${SUPPLY_TYPE_MAP[typeId]?.name} → Room ${guestRoom}`,
+          supplyUnitIds: [unit.id],
+          fromFloor: floor, fromLocation: 'closet',
+          toFloor: floor, toLocation: String(guestRoom),
+          requestId: reqId,
+          deadline: null,
+        });
+
+        get()._updateUnit(unit.id, { status: 'in_transit' });
+        set(s => ({ requests: [...s.requests, { ...request, taskId }] }));
+        return { reqId, taskId };
+      },
+
+      triggerReturnReminder(requestId) {
+        const req = get().requests.find(r => r.id === requestId);
+        if (!req) return;
+        get()._notify({
+          type: 'reminder',
+          message: `Room ${req.guestRoom}: Please place your ${SUPPLY_TYPE_MAP[req.typeId]?.name} outside the door for pickup, or tap below to keep it another day.`,
+        });
+        set(s => ({
+          requests: s.requests.map(r => r.id === requestId ? { ...r, reminderSent: true } : r),
+        }));
+      },
+
+      // ─── Notifications ────────────────────────────────────────────────────
+      _notify(notif) {
+        set(s => ({
+          notifications: [{ ...notif, id: uid(), read: false, createdAt: Date.now() }, ...s.notifications],
+        }));
+      },
+      markRead(id) {
+        set(s => ({
+          notifications: s.notifications.map(n => n.id === id ? { ...n, read: true } : n),
+        }));
+      },
+      markAllRead() {
+        set(s => ({ notifications: s.notifications.map(n => ({ ...n, read: true })) }));
+      },
+      clearNotification(id) {
+        set(s => ({ notifications: s.notifications.filter(n => n.id !== id) }));
+      },
+
+      // ─── Conflict Detection ───────────────────────────────────────────────
+      _checkConflicts() {
+        const { events, supplyUnits } = get();
+        if (!events.length) return;
+
+        SUPPLY_TYPES.forEach(type => {
+          const totalNeeded = events.reduce((sum, e) => sum + (e.rooms?.length || 0), 0);
+          const totalHave = supplyUnits.filter(u => u.typeId === type.id).length;
+          if (totalNeeded > totalHave) {
+            get()._notify({
+              type: 'conflict',
+              message: `⚠️ Supply shortage: Need ${totalNeeded} ${type.name}(s) across all events but only have ${totalHave}. Source ${totalNeeded - totalHave} more.`,
+            });
+          }
+        });
+      },
+
+      // ─── Deploy Plan ──────────────────────────────────────────────────────
+      getDeployPlan() {
+        const { events, supplyUnits } = get();
+        if (!events.length) return [];
+
+        const plans = [];
+
+        events.forEach(event => {
+          const eventRooms = event.rooms || [];
+          if (!eventRooms.length) return;
+
+          const eventFloors = [...new Set(eventRooms.map(r => Math.floor(r / 100)))];
+          const [h, m] = event.startTime.split(':').map(Number);
+          const eventDate = new Date(`${event.date}T${event.startTime}:00`);
+          const deployBy = new Date(eventDate.getTime() - (event.bufferHours || 3) * 60 * 60 * 1000);
+
+          eventFloors.forEach(floor => {
+            const floorRooms = eventRooms.filter(r => Math.floor(r / 100) === floor);
+
+            SUPPLY_TYPES.forEach(type => {
+              const needed = floorRooms.length;
+              const alreadyOnFloor = supplyUnits.filter(
+                u => u.typeId === type.id && u.floor === floor && u.status !== 'checked_out'
+              ).length;
+              const toSend = Math.max(0, needed - alreadyOnFloor);
+              if (toSend === 0) return;
+
+              const available = supplyUnits.filter(
+                u => u.typeId === type.id && u.floor !== floor && u.status === 'available'
+              ).length;
+
+              plans.push({
+                eventId: event.id,
+                eventName: event.name,
+                typeId: type.id,
+                typeName: type.name,
+                emoji: type.emoji,
+                toFloor: floor,
+                needed,
+                alreadyOnFloor,
+                toSend,
+                canFulfill: Math.min(toSend, available),
+                shortage: Math.max(0, toSend - available),
+                deadline: deployBy,
+              });
+            });
+          });
+        });
+
+        return plans;
+      },
+
+      // ─── UI State ─────────────────────────────────────────────────────────
+      setGuestRoom: (room) => set({ guestRoom: room }),
+      setMapFloor: (floor) => set({ currentMapFloor: floor }),
+
+      resetAll: () => set(initialState),
+    }),
+    { name: 'hotel-supply-v1' }
+  )
+);
+
+// Derived selectors
+export const selectors = {
+  unreadCount: (s) => s.notifications.filter(n => !n.read).length,
+  pendingTasks: (s) => s.tasks.filter(t => t.status === 'pending' || t.status === 'accepted'),
+  activeTasks: (s) => s.tasks.filter(t => t.status !== 'completed'),
+  unitsByFloor: (s, floor) => s.supplyUnits.filter(u => u.floor === floor),
+  unitsInCloset: (s, floor) => s.supplyUnits.filter(u => u.floor === floor && u.location === 'closet' && u.status === 'available'),
+  availableOnFloor: (s, floor) => {
+    const inCloset = s.supplyUnits.filter(u => u.floor === floor && u.location === 'closet' && u.status === 'available');
+    const byType = {};
+    inCloset.forEach(u => { byType[u.typeId] = (byType[u.typeId] || 0) + 1; });
+    return byType;
+  },
+};
