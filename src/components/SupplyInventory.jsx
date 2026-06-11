@@ -23,8 +23,8 @@ function SupplyRow({ type, floor }) {
             <p className="text-sm font-medium text-slate-800">{type.name}</p>
             <div className="flex gap-2 text-[10px] text-slate-400 mt-0.5">
               {available > 0 && <span className="text-green-600">{available} avail</span>}
-              {inTransit > 0 && <span className="text-amber-500">{inTransit} moving</span>}
-              {checkedOut > 0 && <span className="text-blue-500">{checkedOut} out</span>}
+              {inTransit > 0 && <span className="text-amber-500">↓ {inTransit} incoming</span>}
+              {checkedOut > 0 && <span className="text-blue-500">{checkedOut} with guest</span>}
               {total === 0 && <span>none on this floor</span>}
             </div>
           </div>

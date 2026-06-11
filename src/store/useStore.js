@@ -138,7 +138,9 @@ export const useStore = create(
             requestId: null,
           });
 
-          freshUnits.forEach(u => get()._updateUnit(u.id, { status: 'in_transit' }));
+          // Move floor immediately so source floor count drops when task is created,
+          // not only when completed. Destination shows them as 'in_transit' (incoming).
+          freshUnits.forEach(u => get()._updateUnit(u.id, { status: 'in_transit', floor: plan.toFloor }));
           tasksCreated++;
 
           if (plan.shortage > 0) {
