@@ -33,7 +33,6 @@ export const useStore = create(
       addEvent(data) {
         const event = { ...data, id: uid(), createdAt: Date.now() };
         set(s => ({ events: [...s.events, event] }));
-        get()._checkConflicts();
         return event.id;
       },
       removeEvent(id) {
@@ -41,7 +40,6 @@ export const useStore = create(
       },
       updateEvent(id, data) {
         set(s => ({ events: s.events.map(e => e.id === id ? { ...e, ...data } : e) }));
-        get()._checkConflicts();
       },
 
       // ─── Supply Inventory ─────────────────────────────────────────────────
@@ -50,7 +48,6 @@ export const useStore = create(
           id: uid(), typeId, floor, location: 'closet', status: 'available',
         }));
         set(s => ({ supplyUnits: [...s.supplyUnits, ...units] }));
-        get()._checkConflicts();
       },
       removeSupplyUnits(typeId, quantity, floor) {
         set(s => {
@@ -60,7 +57,6 @@ export const useStore = create(
             .map(u => u.id);
           return { supplyUnits: s.supplyUnits.filter(u => !removable.includes(u.id)) };
         });
-        get()._checkConflicts();
       },
       _updateUnit(unitId, updates) {
         set(s => ({
