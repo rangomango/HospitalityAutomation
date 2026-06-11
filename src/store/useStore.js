@@ -109,30 +109,32 @@ export const useStore = create(
         }));
       },
 
-      // Create forward-deploy tasks from deploy plan — always runs for available items,
-      // notifies staff about any shortages so they can source more.
+      // Create forward-deploy tasks from deploy plan.
+      // Re-reads supplyUnits each iteration so in_transit marks from prior iterations
+      // don't cause the same unit to be assigned twice.
       createDeployTasks(plans) {
-        const { supplyUnits } = get();
+        let tasksCreated = 0;
         plans.forEach(plan => {
           if (plan.canFulfill <= 0) {
             if (plan.shortage > 0) {
               get()._notify({
                 type: 'conflict',
-                message: `⚠️ Cannot deploy: 0 ${plan.typeName}(s) available for Floor ${plan.toFloor} (${plan.eventName}). Source ${plan.shortage} more.`,
+                message: `⚠️ Cannot deploy: no ${plan.typeName}(s) available for Floor ${plan.toFloor} (${plan.eventName}). Source ${plan.shortage} more.`,
               });
             }
             return;
           }
-          const units = supplyUnits
+          // Fresh read each iteration — previous _updateUnit calls may have changed statuses
+          const freshUnits = get().supplyUnits
             .filter(u => u.typeId === plan.typeId && u.status === 'available' && u.floor !== plan.toFloor)
             .slice(0, plan.canFulfill);
-          if (!units.length) return;
+          if (!freshUnits.length) return;
 
           get()._createTask({
             type: 'forward_deploy',
-            label: `Deploy ${plan.canFulfill}× ${SUPPLY_TYPE_MAP[plan.typeId]?.name} → Floor ${plan.toFloor} (${plan.eventName})`,
-            supplyUnitIds: units.map(u => u.id),
-            fromFloor: units[0].floor,
+            label: `Deploy ${freshUnits.length}× ${SUPPLY_TYPE_MAP[plan.typeId]?.name} → Floor ${plan.toFloor} (${plan.eventName})`,
+            supplyUnitIds: freshUnits.map(u => u.id),
+            fromFloor: freshUnits[0].floor,
             fromLocation: 'closet',
             toFloor: plan.toFloor,
             toLocation: 'closet',
@@ -140,26 +142,36 @@ export const useStore = create(
             requestId: null,
           });
 
-          units.forEach(u => get()._updateUnit(u.id, { status: 'in_transit' }));
+          freshUnits.forEach(u => get()._updateUnit(u.id, { status: 'in_transit' }));
+          tasksCreated++;
 
           if (plan.shortage > 0) {
             get()._notify({
               type: 'conflict',
-              message: `⚠️ Partial deploy: Moving ${plan.canFulfill}/${plan.toSend} ${plan.typeName}(s) to Floor ${plan.toFloor}. Still need ${plan.shortage} more for "${plan.eventName}" — source additional inventory.`,
+              message: `⚠️ Partial deploy: Moving ${freshUnits.length}/${plan.toSend} ${plan.typeName}(s) to Floor ${plan.toFloor}. Still need ${plan.shortage} more for "${plan.eventName}".`,
             });
           }
         });
+        return tasksCreated;
       },
 
-      // Trigger deploy for a single event (test shortcut)
+      // Trigger deploy for a single event (test shortcut).
+      // Returns count of tasks actually created (0 = nothing to do or no inventory).
       triggerEventDeploy(eventId) {
         const plan = get().getDeployPlan().filter(p => p.eventId === eventId);
-        if (!plan.length) {
-          get()._notify({ type: 'task', message: 'All floors already stocked for this event.' });
+        const actionable = plan.filter(p => p.canFulfill > 0);
+
+        if (!actionable.length) {
+          get()._notify({
+            type: plan.length ? 'conflict' : 'task',
+            message: plan.length
+              ? `Cannot deploy for this event: no available inventory to move. Add supplies on a different floor first.`
+              : `All floors are already stocked for this event — no deployment needed.`,
+          });
           return 0;
         }
-        get().createDeployTasks(plan);
-        return plan.length;
+
+        return get().createDeployTasks(plan);
       },
 
       // ─── Guest Requests ───────────────────────────────────────────────────
