@@ -109,19 +109,28 @@ export const useStore = create(
         }));
       },
 
-      // Create forward-deploy tasks from deploy plan
+      // Create forward-deploy tasks from deploy plan — always runs for available items,
+      // notifies staff about any shortages so they can source more.
       createDeployTasks(plans) {
         const { supplyUnits } = get();
         plans.forEach(plan => {
-          if (plan.canFulfill <= 0) return;
+          if (plan.canFulfill <= 0) {
+            if (plan.shortage > 0) {
+              get()._notify({
+                type: 'conflict',
+                message: `⚠️ Cannot deploy: 0 ${plan.typeName}(s) available for Floor ${plan.toFloor} (${plan.eventName}). Source ${plan.shortage} more.`,
+              });
+            }
+            return;
+          }
           const units = supplyUnits
             .filter(u => u.typeId === plan.typeId && u.status === 'available' && u.floor !== plan.toFloor)
             .slice(0, plan.canFulfill);
           if (!units.length) return;
 
-          const taskId = get()._createTask({
+          get()._createTask({
             type: 'forward_deploy',
-            label: `Deploy ${plan.canFulfill}x ${SUPPLY_TYPE_MAP[plan.typeId]?.name} → Floor ${plan.toFloor} (${plan.eventName})`,
+            label: `Deploy ${plan.canFulfill}× ${SUPPLY_TYPE_MAP[plan.typeId]?.name} → Floor ${plan.toFloor} (${plan.eventName})`,
             supplyUnitIds: units.map(u => u.id),
             fromFloor: units[0].floor,
             fromLocation: 'closet',
@@ -131,9 +140,26 @@ export const useStore = create(
             requestId: null,
           });
 
-          // Mark units in transit
           units.forEach(u => get()._updateUnit(u.id, { status: 'in_transit' }));
+
+          if (plan.shortage > 0) {
+            get()._notify({
+              type: 'conflict',
+              message: `⚠️ Partial deploy: Moving ${plan.canFulfill}/${plan.toSend} ${plan.typeName}(s) to Floor ${plan.toFloor}. Still need ${plan.shortage} more for "${plan.eventName}" — source additional inventory.`,
+            });
+          }
         });
+      },
+
+      // Trigger deploy for a single event (test shortcut)
+      triggerEventDeploy(eventId) {
+        const plan = get().getDeployPlan().filter(p => p.eventId === eventId);
+        if (!plan.length) {
+          get()._notify({ type: 'task', message: 'All floors already stocked for this event.' });
+          return 0;
+        }
+        get().createDeployTasks(plan);
+        return plan.length;
       },
 
       // ─── Guest Requests ───────────────────────────────────────────────────
@@ -202,12 +228,13 @@ export const useStore = create(
         if (!events.length) return;
 
         SUPPLY_TYPES.forEach(type => {
-          const totalNeeded = events.reduce((sum, e) => sum + (e.rooms?.length || 0), 0);
+          // 1 unit covers 3 rooms
+          const totalNeeded = events.reduce((sum, e) => sum + Math.ceil((e.rooms?.length || 0) / 3), 0);
           const totalHave = supplyUnits.filter(u => u.typeId === type.id).length;
           if (totalNeeded > totalHave) {
             get()._notify({
               type: 'conflict',
-              message: `⚠️ Supply shortage: Need ${totalNeeded} ${type.name}(s) across all events but only have ${totalHave}. Source ${totalNeeded - totalHave} more.`,
+              message: `⚠️ Supply shortage: Need ${totalNeeded} ${type.name}(s) across all events (1 per 3 rooms) but only have ${totalHave}. Source ${totalNeeded - totalHave} more.`,
             });
           }
         });
@@ -233,7 +260,8 @@ export const useStore = create(
             const floorRooms = eventRooms.filter(r => Math.floor(r / 100) === floor);
 
             SUPPLY_TYPES.forEach(type => {
-              const needed = floorRooms.length;
+              // 1 unit serves 3 rooms
+              const needed = Math.ceil(floorRooms.length / 3);
               const alreadyOnFloor = supplyUnits.filter(
                 u => u.typeId === type.id && u.floor === floor && u.status !== 'checked_out'
               ).length;

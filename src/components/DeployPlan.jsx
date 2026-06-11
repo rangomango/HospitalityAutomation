@@ -30,10 +30,10 @@ export default function DeployPlan() {
   }
 
   const conflicts = plan.filter(p => p.shortage > 0);
-  const actionable = plan.filter(p => p.canFulfill > 0);
-
+  // Always pass the full plan — createDeployTasks skips items with canFulfill=0
+  // and auto-notifies staff about shortages for those.
   const handleCreateTasks = () => {
-    createDeployTasks(actionable);
+    createDeployTasks(plan);
     setCreated(true);
   };
 
@@ -92,9 +92,13 @@ export default function DeployPlan() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-brand-600">{p.canFulfill} units</p>
-                    {p.shortage > 0 && (
-                      <p className="text-[10px] text-red-500">{p.shortage} short</p>
+                    {p.shortage > 0 ? (
+                      <>
+                        <p className="text-sm font-bold text-amber-600">{p.canFulfill} / {p.toSend} units</p>
+                        <p className="text-[10px] text-red-500 font-semibold">{p.shortage} short — source more</p>
+                      </>
+                    ) : (
+                      <p className="text-sm font-bold text-brand-600">{p.canFulfill} units ✓</p>
                     )}
                   </div>
                 </div>
@@ -104,24 +108,24 @@ export default function DeployPlan() {
         );
       })}
 
-      {/* Action button */}
-      {actionable.length > 0 && (
-        <button
-          onClick={handleCreateTasks}
-          disabled={created}
-          className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
-            created
-              ? 'bg-green-100 text-green-700 border border-green-200'
-              : 'bg-brand-600 text-white hover:bg-brand-700'
-          }`}
-        >
-          {created ? (
-            <><CheckCircle size={16} /> Tasks Created — Check Staff View</>
-          ) : (
-            <><Truck size={16} /> Approve & Create Deploy Tasks</>
-          )}
-        </button>
-      )}
+      {/* Action button — always shown so partial-shortage tasks still get created */}
+      <button
+        onClick={handleCreateTasks}
+        disabled={created}
+        className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
+          created
+            ? 'bg-green-100 text-green-700 border border-green-200'
+            : 'bg-brand-600 text-white hover:bg-brand-700'
+        }`}
+      >
+        {created ? (
+          <><CheckCircle size={16} /> Tasks Created — Check Staff View</>
+        ) : conflicts.length > 0 ? (
+          <><Truck size={16} /> Deploy Available Items (shortages flagged)</>
+        ) : (
+          <><Truck size={16} /> Approve & Create Deploy Tasks</>
+        )}
+      </button>
     </div>
   );
 }
