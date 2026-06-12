@@ -29,7 +29,7 @@ function TaskCard({ task }) {
     : `Room ${task.toLocation} (Floor ${task.toFloor})`;
 
   const typeLabel = {
-    forward_deploy: 'Pre-stage',
+    forward_deploy: 'Replenish',
     deliver:        'Guest Delivery',
     retrieve:       'Item Retrieval',
   }[task.type] || task.type;
