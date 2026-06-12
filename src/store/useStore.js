@@ -149,7 +149,9 @@ export const useStore = create(
               deadline: plan.deadline,
               requestId: null,
             });
-            units.forEach(u => get()._updateUnit(u.id, { status: 'in_transit', floor: plan.toFloor }));
+            // Keep units on source floor — floor only updates when task is completed.
+            // This keeps per-floor totals stable until staff physically moves the items.
+            units.forEach(u => get()._updateUnit(u.id, { status: 'in_transit' }));
           });
           tasksCreated++;
 
@@ -302,8 +304,23 @@ export const useStore = create(
 
       // ─── Deploy Plan ──────────────────────────────────────────────────────
       getDeployPlan() {
-        const { events, supplyUnits } = get();
+        const { events, supplyUnits, tasks } = get();
         if (!events.length) return [];
+
+        // Pre-compute units already in_transit headed to each floor (pending/accepted tasks).
+        // Since we don't move unit.floor on task creation, we read toFloor from the task itself.
+        const inTransitToFloor = {};
+        tasks
+          .filter(t => t.type === 'forward_deploy' && (t.status === 'pending' || t.status === 'accepted'))
+          .forEach(t => {
+            (t.supplyUnitIds || []).forEach(unitId => {
+              const unit = supplyUnits.find(u => u.id === unitId);
+              if (unit) {
+                const key = `${unit.typeId}_${t.toFloor}`;
+                inTransitToFloor[key] = (inTransitToFloor[key] || 0) + 1;
+              }
+            });
+          });
 
         const plans = [];
 
@@ -312,7 +329,6 @@ export const useStore = create(
           if (!eventRooms.length) return;
 
           const eventFloors = [...new Set(eventRooms.map(r => Math.floor(r / 100)))];
-          const [h, m] = event.startTime.split(':').map(Number);
           const eventDate = new Date(`${event.date}T${event.startTime}:00`);
           const deployBy = new Date(eventDate.getTime() - (event.bufferHours || 3) * 60 * 60 * 1000);
 
@@ -325,7 +341,9 @@ export const useStore = create(
               const alreadyOnFloor = supplyUnits.filter(
                 u => u.typeId === type.id && u.floor === floor && u.status !== 'checked_out'
               ).length;
-              const toSend = Math.max(0, needed - alreadyOnFloor);
+              const inTransit = inTransitToFloor[`${type.id}_${floor}`] || 0;
+              const effectiveOnFloor = alreadyOnFloor + inTransit;
+              const toSend = Math.max(0, needed - effectiveOnFloor);
               if (toSend === 0) return;
 
               const available = supplyUnits.filter(
@@ -339,7 +357,7 @@ export const useStore = create(
                 typeName: type.name,
                 toFloor: floor,
                 needed,
-                alreadyOnFloor,
+                alreadyOnFloor: effectiveOnFloor,
                 toSend,
                 canFulfill: Math.min(toSend, available),
                 shortage: Math.max(0, toSend - available),

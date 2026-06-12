@@ -12,7 +12,7 @@ const TABS = [
   { id: 'events',    label: 'Events',    Icon: CalendarDays },
   { id: 'map',       label: 'Floor Map', Icon: Map          },
   { id: 'inventory', label: 'Inventory', Icon: Package      },
-  { id: 'deploy',    label: 'Deploy',    Icon: Truck        },
+  { id: 'deploy',    label: 'Status',    Icon: Truck        },
 ];
 
 function EventCard({ event }) {

@@ -1,10 +1,44 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Plus, Minus } from 'lucide-react';
 import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive, MdRoomService, MdExplore } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
 import { SupplyIcon } from '../components/SupplyIcon';
 import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
+
+const ROOM_SERVICE_MENU = [
+  {
+    category: 'Breakfast',
+    items: [
+      { id: 'eggs_ben',  name: 'Classic Eggs Benedict',  desc: 'Poached eggs, Canadian bacon, hollandaise',          price: 22 },
+      { id: 'fr_toast',  name: 'Brioche French Toast',   desc: 'Whipped cream, seasonal berries, maple syrup',       price: 18 },
+      { id: 'avo_toast', name: 'Avocado Toast',          desc: 'Multigrain, heirloom tomatoes, micro greens',        price: 16 },
+    ],
+  },
+  {
+    category: 'Lunch & Dinner',
+    items: [
+      { id: 'club',    name: 'Club Sandwich',  desc: 'Turkey, bacon, avocado, house-baked bread',              price: 24 },
+      { id: 'caesar',  name: 'Caesar Salad',   desc: 'Romaine, parmesan, house caesar, focaccia croutons',    price: 18 },
+      { id: 'salmon',  name: 'Grilled Salmon', desc: 'Lemon butter, seasonal vegetables, wild rice',          price: 36 },
+    ],
+  },
+  {
+    category: 'Beverages',
+    items: [
+      { id: 'water',  name: 'Still or Sparkling Water', desc: 'Chilled, 500ml',                      price: 6 },
+      { id: 'oj',     name: 'Fresh Orange Juice',       desc: 'Freshly squeezed, 12 oz',             price: 8 },
+      { id: 'coffee', name: 'Coffee or Tea',            desc: 'Locally sourced, served with cream',  price: 5 },
+    ],
+  },
+  {
+    category: 'Desserts',
+    items: [
+      { id: 'lava',   name: 'Chocolate Lava Cake', desc: 'Warm, vanilla bean ice cream',       price: 14 },
+      { id: 'sorbet', name: 'Seasonal Sorbet',     desc: 'Three scoops, fresh fruit garnish',  price: 12 },
+    ],
+  },
+];
 
 function RoomEntry() {
   const setGuestRoom = useStore(s => s.setGuestRoom);
@@ -128,28 +162,172 @@ function SupplyCard({ type, floor, guestRoom }) {
   );
 }
 
-function GuestToggles() {
-  const [roomService, setRoomService] = useState(false);
-  const [localGuide, setLocalGuide] = useState(false);
+function RoomServiceView({ guestRoom, onClose }) {
+  const [cart, setCart] = useState({});
+  const [ordered, setOrdered] = useState(false);
 
-  const toggleStyle = (active) => active
-    ? { color: '#2BCA95', background: 'rgba(43,202,149,0.1)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }
-    : { color: '#4a7068', background: 'rgba(0,0,0,0.2)' };
+  const addItem = (id) => setCart(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
+  const removeItem = (id) => setCart(c => {
+    if (!c[id] || c[id] <= 1) { const { [id]: _, ...rest } = c; return rest; }
+    return { ...c, [id]: c[id] - 1 };
+  });
 
+  const allItems = ROOM_SERVICE_MENU.flatMap(s => s.items);
+  const total = allItems.reduce((sum, item) => sum + (cart[item.id] || 0) * item.price, 0);
+  const itemCount = Object.values(cart).reduce((s, q) => s + q, 0);
+
+  const handleOrder = () => {
+    if (!itemCount) return;
+    setOrdered(true);
+    setTimeout(() => { setOrdered(false); setCart({}); }, 3000);
+  };
+
+  return (
+    <div className="absolute inset-0 z-10 flex flex-col" style={{ background: '#08090a' }}>
+      <div className="px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0 bg-lance-surface">
+        <button
+          onClick={onClose}
+          className="p-1.5 text-lance-text-sub hover:text-lance-text transition-colors"
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <MdRoomService size={20} className="text-lance-accent" />
+        <div>
+          <h2 className="font-bold text-base leading-tight text-lance-text">Room Service</h2>
+          <p className="text-[11px] text-lance-text-sub">Room {guestRoom}</p>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto scrollable px-4 pb-36">
+        {ROOM_SERVICE_MENU.map(section => (
+          <div key={section.category} className="mt-4">
+            <p className="text-[11px] font-bold text-lance-accent uppercase tracking-wide mb-2">
+              {section.category}
+            </p>
+            {section.items.map(item => (
+              <div key={item.id} className="bg-lance-surface rounded-xl p-3 mb-2 flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-lance-text">{item.name}</p>
+                  <p className="text-[11px] text-lance-text-sub mt-0.5 leading-snug">{item.desc}</p>
+                  <p className="text-sm font-bold mt-1.5" style={{ color: '#e8b254' }}>${item.price}</p>
+                </div>
+                <div className="flex-shrink-0 flex items-center mt-1">
+                  {!cart[item.id] ? (
+                    <button
+                      onClick={() => addItem(item.id)}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+                      style={{ color: '#2BCA95', background: 'rgba(43,202,149,0.07)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }}
+                    >
+                      Add
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+                        style={{ background: 'rgba(0,0,0,0.3)', color: '#4a7068' }}
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span className="text-sm font-bold text-lance-text w-4 text-center">{cart[item.id]}</span>
+                      <button
+                        onClick={() => addItem(item.id)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+                        style={{ background: 'rgba(43,202,149,0.12)', color: '#2BCA95' }}
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div
+        className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-8 flex-shrink-0"
+        style={{ background: 'linear-gradient(to top, #08090a 70%, transparent)' }}
+      >
+        {itemCount > 0 && (
+          <div className="flex items-center justify-between mb-2 px-1">
+            <p className="text-xs text-lance-text-sub">{itemCount} item{itemCount !== 1 ? 's' : ''}</p>
+            <p className="text-base font-bold text-lance-text">${total.toFixed(2)}</p>
+          </div>
+        )}
+        <button
+          onClick={handleOrder}
+          disabled={!itemCount}
+          className="w-full py-3 rounded-xl text-sm font-bold transition-all"
+          style={
+            ordered
+              ? { color: '#2BCA95', background: 'rgba(43,202,149,0.1)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }
+              : itemCount
+                ? { background: '#2BCA95', color: '#08090a' }
+                : { background: 'rgba(0,0,0,0.2)', color: '#4a7068' }
+          }
+        >
+          {ordered ? '✓ Order placed!' : itemCount ? `Place Order · $${total.toFixed(2)}` : 'Select items to order'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LocalGuideView({ onClose }) {
+  return (
+    <div className="absolute inset-0 z-10 flex flex-col" style={{ background: '#08090a' }}>
+      <div className="px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0 bg-lance-surface">
+        <button
+          onClick={onClose}
+          className="p-1.5 text-lance-text-sub hover:text-lance-text transition-colors"
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <MdExplore size={20} className="text-lance-accent" />
+        <h2 className="font-bold text-base text-lance-text">Local Guide</h2>
+      </div>
+
+      <div className="flex-1 overflow-hidden">
+        <iframe
+          src="https://maps.app.goo.gl/F5MJeeQj39ySxcGn7"
+          className="w-full h-full border-0"
+          title="Claremont Local Guide"
+          allow="geolocation"
+        />
+      </div>
+
+      <div className="px-4 py-3 flex-shrink-0 bg-lance-surface">
+        <a
+          href="https://maps.app.goo.gl/F5MJeeQj39ySxcGn7"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"
+          style={{ color: '#2BCA95', background: 'rgba(43,202,149,0.07)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }}
+        >
+          <MdExplore size={15} /> Open in Google Maps
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function GuestToggles({ onRoomService, onLocalGuide }) {
   return (
     <div className="flex gap-2 mt-3">
       <button
-        onClick={() => setRoomService(v => !v)}
+        onClick={onRoomService}
         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
-        style={toggleStyle(roomService)}
+        style={{ color: '#4a7068', background: 'rgba(0,0,0,0.2)' }}
       >
         <MdRoomService size={16} />
         Room Service
       </button>
       <button
-        onClick={() => setLocalGuide(v => !v)}
+        onClick={onLocalGuide}
         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
-        style={toggleStyle(localGuide)}
+        style={{ color: '#4a7068', background: 'rgba(0,0,0,0.2)' }}
       >
         <MdExplore size={16} />
         Local Guide
@@ -193,6 +371,8 @@ function DevPanel({ guestRoom, onOpenSetup }) {
 export default function GuestView({ onOpenSetup }) {
   const guestRoom = useStore(s => s.guestRoom);
   const events = useStore(s => s.events);
+  const [showRoomService, setShowRoomService] = useState(false);
+  const [showLocalGuide, setShowLocalGuide] = useState(false);
 
   if (!guestRoom) return <RoomEntry />;
 
@@ -202,7 +382,7 @@ export default function GuestView({ onOpenSetup }) {
   const personalCare = SUPPLY_TYPES.filter(t => t.category === 'personal_care');
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex flex-col h-full">
       {/* Room header */}
       <div className="px-4 pt-3 pb-2 flex-shrink-0">
         {matchingEvent && (
@@ -258,9 +438,19 @@ export default function GuestView({ onOpenSetup }) {
           </>
         )}
 
-        <GuestToggles />
+        <GuestToggles
+          onRoomService={() => setShowRoomService(true)}
+          onLocalGuide={() => setShowLocalGuide(true)}
+        />
         <DevPanel guestRoom={guestRoom} onOpenSetup={onOpenSetup} />
       </div>
+
+      {showRoomService && (
+        <RoomServiceView guestRoom={guestRoom} onClose={() => setShowRoomService(false)} />
+      )}
+      {showLocalGuide && (
+        <LocalGuideView onClose={() => setShowLocalGuide(false)} />
+      )}
     </div>
   );
 }

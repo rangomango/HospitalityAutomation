@@ -83,7 +83,7 @@ export default function DeployPlan() {
         <div className="bg-red-950/40 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle size={16} className="text-red-400" />
-            <p className="text-sm font-bold text-red-300">Supply Shortages Detected</p>
+            <p className="text-sm font-bold text-red-300">Potential Supply Shortage</p>
           </div>
           {conflicts.map((p, i) => (
             <div key={i} className="flex items-center gap-2 text-xs text-red-400 py-1">

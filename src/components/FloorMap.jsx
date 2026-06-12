@@ -266,7 +266,7 @@ export default function FloorMap() {
               </span>
               <div className="flex gap-3 text-xs">
                 <span className="text-lance-accent font-semibold">{count} in closet</span>
-                {incoming > 0 && <span className="text-lance-gold-lt">↓ {incoming} incoming</span>}
+                {incoming > 0 && <span className="text-lance-gold-lt">{incoming} in transit</span>}
                 {inRooms > 0  && <span className="text-blue-400">{inRooms} in rooms</span>}
               </div>
             </div>

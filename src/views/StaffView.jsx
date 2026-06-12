@@ -163,6 +163,10 @@ export default function StaffView() {
     .sort((a, b) => {
       if (a.type === 'deliver' && b.type !== 'deliver') return -1;
       if (a.type !== 'deliver' && b.type === 'deliver') return 1;
+      if (a.type === 'forward_deploy' && b.type === 'forward_deploy') {
+        const floorDiff = (a.fromFloor || 0) - (b.fromFloor || 0);
+        return floorDiff !== 0 ? floorDiff : a.createdAt - b.createdAt;
+      }
       return a.createdAt - b.createdAt;
     });
   const completedTasks = tasks.filter(t => t.status === 'completed').sort((a, b) => b.completedAt - a.completedAt);
