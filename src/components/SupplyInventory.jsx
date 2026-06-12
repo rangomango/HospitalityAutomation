@@ -54,13 +54,21 @@ function SupplyRow({ type, floor }) {
 export default function SupplyInventory() {
   const [selectedFloor, setSelectedFloor] = useState(1);
   const supplyUnits = useStore(s => s.supplyUnits);
+  const clearInventory = useStore(s => s.clearInventory);
   const totalByType = (typeId) => supplyUnits.filter(u => u.typeId === typeId).length;
 
   return (
     <div>
       {/* Global totals — no border */}
       <div className="bg-lance-surface rounded-xl p-3 mb-4">
-        <p className="text-xs font-semibold text-lance-text-sub mb-2 uppercase tracking-wide">Total Inventory</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-semibold text-lance-text-sub uppercase tracking-wide">Total Inventory</p>
+          {supplyUnits.length > 0 && (
+            <button onClick={clearInventory} className="text-xs text-red-400 font-semibold">
+              Reset all
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-3 gap-2">
           {SUPPLY_TYPES.map(t => (
             <div key={t.id} className="bg-lance-elevated rounded-lg p-2.5 text-center">

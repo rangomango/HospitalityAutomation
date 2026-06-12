@@ -311,6 +311,7 @@ export const useStore = create(
       setMapFloor: (floor) => set({ currentMapFloor: floor }),
 
       clearTasks: () => set({ tasks: [] }),
+      clearInventory: () => set({ supplyUnits: [] }),
       resetAll: () => set(initialState),
     }),
     { name: 'hotel-supply-v1' }
