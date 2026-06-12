@@ -97,7 +97,7 @@ export default function SetupView() {
   return (
     <div className="flex flex-col h-full">
       {/* Sub-nav */}
-      <div className="px-2 py-2 flex gap-1 flex-shrink-0 bg-lance-bg">
+      <div className="px-3 py-2 flex gap-1 flex-shrink-0 bg-lance-bg">
         {TABS.map(({ id, label, Icon }) => (
           <button
             key={id}

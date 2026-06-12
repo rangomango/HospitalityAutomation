@@ -97,10 +97,7 @@ export default function App() {
           className="absolute inset-0 z-50 flex flex-col overflow-hidden"
           style={{ background: '#08090a' }}
         >
-          <div
-            className="px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0"
-            style={{ background: '#0e1c1f', borderBottom: '1px solid rgba(43,202,149,0.2)' }}
-          >
+          <div className="px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
               <Wrench size={16} className="text-lance-accent" />
               <h2 className="font-bold text-base text-lance-text">Hotel Manager</h2>
