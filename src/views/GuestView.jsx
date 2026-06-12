@@ -1,4 +1,4 @@
-import { ArrowRight, X } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
@@ -162,7 +162,6 @@ function DevPanel({ guestRoom, onOpenSetup }) {
 
 export default function GuestView({ onOpenSetup }) {
   const guestRoom = useStore(s => s.guestRoom);
-  const setGuestRoom = useStore(s => s.setGuestRoom);
   const events = useStore(s => s.events);
 
   if (!guestRoom) return <RoomEntry />;
@@ -203,18 +202,10 @@ export default function GuestView({ onOpenSetup }) {
             </div>
           </div>
         )}
-        <div className="bg-lance-surface rounded-xl px-4 py-3 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-lance-text-sub font-medium">Your Room</p>
-            <p className="text-xl font-bold text-lance-accent">{guestRoom}</p>
-            <p className="text-xs text-lance-text-sub">Floor {floor}</p>
-          </div>
-          <button
-            onClick={() => setGuestRoom(null)}
-            className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
-          >
-            <X size={18} />
-          </button>
+        <div className="bg-lance-surface rounded-xl px-4 py-3">
+          <p className="text-xs text-lance-text-sub font-medium">Your Room</p>
+          <p className="text-xl font-bold text-lance-accent">{guestRoom}</p>
+          <p className="text-xs text-lance-text-sub">Floor {floor}</p>
         </div>
       </div>
 

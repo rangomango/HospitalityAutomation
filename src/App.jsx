@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, User, X } from 'lucide-react';
+import { Users, User, Wrench, X } from 'lucide-react';
 import { MdVilla } from 'react-icons/md';
 import { useStore, selectors } from './store/useStore';
 import SetupView from './views/SetupView';
@@ -15,14 +15,43 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('staff');
   const [showSetup, setShowSetup] = useState(false);
   const unread = useStore(selectors.unreadCount);
+  const guestRoom = useStore(s => s.guestRoom);
+  const setGuestRoom = useStore(s => s.setGuestRoom);
+
+  const subtitle = activeTab === 'staff' ? 'Task manager' : null;
 
   return (
     <div className="flex flex-col h-screen bg-lance-bg relative">
       {/* Header */}
       <header className="bg-lance-surface px-4 pt-10 pb-3 flex-shrink-0">
-        <div className="flex items-center gap-2.5">
-          <MdVilla size={26} className="text-lance-accent" />
-          <h1 className="font-bold text-base text-lance-text">Claremont Resort & Club</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <MdVilla size={26} className="text-lance-accent" />
+            <div>
+              <h1 className="font-bold text-base leading-tight text-lance-text">Claremont Resort & Club</h1>
+              {subtitle && <p className="text-[11px] text-lance-text-sub">{subtitle}</p>}
+            </div>
+          </div>
+          {/* Staff: wrench opens setup */}
+          {activeTab === 'staff' && (
+            <button
+              onClick={() => setShowSetup(true)}
+              className="p-2 text-lance-text-sub hover:text-lance-accent transition-colors"
+              aria-label="Open setup"
+            >
+              <Wrench size={18} />
+            </button>
+          )}
+          {/* Guest + room selected: X exits room view */}
+          {activeTab === 'guest' && guestRoom && (
+            <button
+              onClick={() => setGuestRoom(null)}
+              className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
+              aria-label="Exit room"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
       </header>
 
@@ -83,9 +112,11 @@ export default function App() {
           className="absolute inset-0 z-50 flex flex-col overflow-hidden"
           style={{ background: '#08090a' }}
         >
-          {/* Overlay header — X pinned to top-right */}
-          <div className="relative px-4 pt-10 pb-3 flex items-center flex-shrink-0">
-            <h2 className="font-bold text-base text-lance-text">Hotel Manager</h2>
+          <div className="relative px-4 pt-10 pb-3 flex items-start flex-shrink-0">
+            <div>
+              <h2 className="font-bold text-base leading-tight text-lance-text">Hotel Manager</h2>
+              <p className="text-[11px] text-lance-text-sub">Supply management</p>
+            </div>
             <button
               onClick={() => setShowSetup(false)}
               className="absolute top-10 right-4 p-2 text-lance-text-sub hover:text-lance-text transition-colors"
