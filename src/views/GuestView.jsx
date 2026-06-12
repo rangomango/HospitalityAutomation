@@ -175,7 +175,7 @@ export default function GuestView() {
       {/* Room header */}
       <div className="px-4 pt-3 pb-2 flex-shrink-0">
         {matchingEvent && (
-          <p className="text-[11px] font-medium text-lance-gold-lt mb-2 px-1">
+          <p className="text-sm font-semibold mb-2 px-1" style={{ color: '#e8b254' }}>
             Welcome {matchingEvent.name} party
           </p>
         )}
