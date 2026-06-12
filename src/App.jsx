@@ -20,23 +20,9 @@ export default function App() {
     <div className="flex flex-col h-screen bg-lance-bg relative">
       {/* Header */}
       <header className="bg-lance-surface px-4 pt-10 pb-3 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <MdVilla size={26} className="text-lance-accent" />
-            <div>
-              <h1 className="font-bold text-base leading-tight text-lance-text">Claremont Resort & Club</h1>
-              <p className="text-lance-text-sub text-xs">Supply Management</p>
-            </div>
-          </div>
-          {showSetup && (
-            <button
-              onClick={() => setShowSetup(false)}
-              className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
-              aria-label="Close setup"
-            >
-              <X size={18} />
-            </button>
-          )}
+        <div className="flex items-center gap-2.5">
+          <MdVilla size={26} className="text-lance-accent" />
+          <h1 className="font-bold text-base text-lance-text">Claremont Resort & Club</h1>
         </div>
       </header>
 
@@ -62,14 +48,12 @@ export default function App() {
                   active ? 'text-lance-accent' : 'text-lance-text-sub'
                 }`}
               >
-                {/* Active tab pill background */}
                 {active && (
                   <span
                     className="absolute inset-x-3 top-0.5 bottom-1 rounded-xl pointer-events-none"
                     style={{ background: 'rgba(43,202,149,0.07)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }}
                   />
                 )}
-                {/* Top glow line */}
                 {active && (
                   <span
                     className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-px rounded-full"
@@ -93,14 +77,22 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Setup overlay — inline background guarantees full opacity over any content */}
+      {/* Setup overlay */}
       {showSetup && (
         <div
           className="absolute inset-0 z-50 flex flex-col overflow-hidden"
           style={{ background: '#08090a' }}
         >
-          <div className="px-4 pt-10 pb-3 flex items-center flex-shrink-0">
+          {/* Overlay header — X pinned to top-right */}
+          <div className="relative px-4 pt-10 pb-3 flex items-center flex-shrink-0">
             <h2 className="font-bold text-base text-lance-text">Hotel Manager</h2>
+            <button
+              onClick={() => setShowSetup(false)}
+              className="absolute top-10 right-4 p-2 text-lance-text-sub hover:text-lance-text transition-colors"
+              aria-label="Close setup"
+            >
+              <X size={18} />
+            </button>
           </div>
           <div className="flex-1 overflow-hidden" style={{ background: '#08090a' }}>
             <SetupView />

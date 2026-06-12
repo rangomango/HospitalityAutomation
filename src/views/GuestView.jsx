@@ -196,7 +196,7 @@ export default function GuestView({ onOpenSetup }) {
             <div className="relative z-10 flex justify-center px-4 py-2.5">
               <span
                 className="text-sm font-semibold px-4 py-1 rounded-lg"
-                style={{ color: '#23a87c', background: 'rgba(255,255,255,0.13)' }}
+                style={{ color: '#23a87c', background: 'rgba(0,0,0,0.8)' }}
               >
                 Welcome {matchingEvent.name} party
               </span>
