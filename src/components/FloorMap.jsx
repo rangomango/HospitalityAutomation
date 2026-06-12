@@ -87,17 +87,17 @@ function Closet({ x, y, h, units }) {
       {types.slice(0, 6).map(([typeId, count], i) => {
         const col = i % 2;
         const row = Math.floor(i / 2);
-        const cx = x + 10 + col * 20;
-        const cy = y + 24 + row * 17;
+        // Center each item within its half of the closet width (21px per column)
+        const cx = x + 10.5 + col * 21;
+        const dotY = y + 26 + row * 20;
         return (
           <g key={typeId}>
-            {/* dot */}
-            <circle cx={cx} cy={cy} r={5.5} fill={DOT_COLORS[typeId] || C.textSub} opacity={0.85} />
-            <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="5" fontWeight="700" fill="white">
+            <circle cx={cx} cy={dotY} r={5} fill={DOT_COLORS[typeId] || C.textSub} opacity={0.85} />
+            <text x={cx} y={dotY} textAnchor="middle" dominantBaseline="middle" fontSize="5" fontWeight="700" fill="white">
               {SUPPLY_ABBR[typeId] || '?'}
             </text>
-            {/* count — bright + bold so it's readable */}
-            <text x={cx + 8} y={cy + 1} fontSize="8" fontWeight="700" fill={C.text} dominantBaseline="middle">
+            {/* count centered below dot — no horizontal overflow */}
+            <text x={cx} y={dotY + 10} textAnchor="middle" fontSize="7" fontWeight="700" fill={C.text}>
               {count}
             </text>
           </g>
