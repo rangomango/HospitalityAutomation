@@ -5,18 +5,19 @@ import EventForm from '../components/EventForm';
 import SupplyInventory from '../components/SupplyInventory';
 import FloorMap from '../components/FloorMap';
 import DeployPlan from '../components/DeployPlan';
+import { SUPPLY_TYPE_MAP } from '../data/constants';
 
 const TABS = [
-  { id: 'events',    label: 'Events',   Icon: CalendarDays },
-  { id: 'inventory', label: 'Inventory', Icon: Package    },
-  { id: 'map',       label: 'Floor Map', Icon: Map        },
-  { id: 'deploy',    label: 'Deploy',    Icon: Truck      },
+  { id: 'events',    label: 'Events',    Icon: CalendarDays },
+  { id: 'inventory', label: 'Inventory', Icon: Package      },
+  { id: 'map',       label: 'Floor Map', Icon: Map          },
+  { id: 'deploy',    label: 'Deploy',    Icon: Truck        },
 ];
 
 function EventCard({ event }) {
   const removeEvent = useStore(s => s.removeEvent);
   const triggerEventDeploy = useStore(s => s.triggerEventDeploy);
-  const [triggerState, setTriggerState] = useState(null); // null | 'ok' | 'empty'
+  const [triggerState, setTriggerState] = useState(null);
 
   const [h, m] = event.startTime.split(':').map(Number);
   const deployH = h - event.bufferHours;
@@ -31,40 +32,39 @@ function EventCard({ event }) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-3 mb-2">
+    <div className="bg-lance-surface border border-lance-border rounded-xl p-3 mb-2">
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-base">🎉</span>
-            <p className="font-semibold text-slate-800 text-sm">{event.name}</p>
-            <span className="text-[10px] bg-amber-100 text-amber-700 rounded-full px-2 py-0.5 font-medium">
+            <p className="font-semibold text-lance-text text-sm">{event.name}</p>
+            <span className="text-[10px] bg-lance-gold-dim text-lance-gold-lt rounded-full px-2 py-0.5 font-medium">
               {event.type}
             </span>
           </div>
           <div className="mt-1.5 space-y-0.5">
-            <p className="text-xs text-slate-500">📅 {event.date} at {event.startTime}</p>
-            <p className="text-xs text-slate-500">🚚 Deploy by {deployTime} ({event.bufferHours}h buffer)</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-lance-text-md">📅 {event.date} at {event.startTime}</p>
+            <p className="text-xs text-lance-text-md">🚚 Deploy by {deployTime} ({event.bufferHours}h buffer)</p>
+            <p className="text-xs text-lance-text-md">
               🏨 {event.rooms?.length || 0} rooms · Floors {floors.join(', ')} · ~{suppliesNeeded} units/type needed
             </p>
           </div>
         </div>
         <button
           onClick={() => removeEvent(event.id)}
-          className="p-1.5 text-slate-400 hover:text-red-400 transition-colors flex-shrink-0"
+          className="p-1.5 text-lance-text-sub hover:text-red-400 transition-colors flex-shrink-0"
         >
           <Trash2 size={15} />
         </button>
       </div>
 
-      {/* Manual deploy trigger */}
-      <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center gap-2">
+      <div className="mt-2.5 pt-2.5 border-t border-lance-border-sub flex items-center gap-2">
         <button
           onClick={handleTrigger}
           className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-            triggerState === 'ok'    ? 'bg-green-100 text-green-700' :
-            triggerState === 'empty' ? 'bg-slate-100 text-slate-500' :
-            'bg-amber-50 text-amber-700 hover:bg-amber-100'
+            triggerState === 'ok'    ? 'bg-lance-accent-dim text-lance-accent-lt' :
+            triggerState === 'empty' ? 'bg-lance-elevated text-lance-text-sub' :
+            'bg-lance-gold-dim text-lance-gold-lt hover:bg-lance-gold/20'
           }`}
         >
           <Zap size={12} />
@@ -72,7 +72,7 @@ function EventCard({ event }) {
            triggerState === 'empty' ? 'Nothing to deploy' :
            'Trigger Deploy Now'}
         </button>
-        <p className="text-[10px] text-slate-400">Simulates buffer time passing</p>
+        <p className="text-[10px] text-lance-text-sub">Simulates buffer time passing</p>
       </div>
     </div>
   );
@@ -85,14 +85,16 @@ export default function SetupView() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Sub-nav tabs */}
-      <div className="bg-white border-b border-slate-100 px-2 py-1.5 flex gap-0.5 flex-shrink-0">
+      {/* Sub-nav */}
+      <div className="bg-lance-surface border-b border-lance-border px-2 py-1.5 flex gap-0.5 flex-shrink-0">
         {TABS.map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
             className={`flex-1 flex flex-col items-center py-1.5 rounded-lg text-[10px] font-semibold transition-colors gap-0.5 ${
-              activeTab === id ? 'bg-brand-50 text-brand-700' : 'text-slate-400 hover:text-slate-600'
+              activeTab === id
+                ? 'bg-lance-accent-dim text-lance-accent'
+                : 'text-lance-text-sub hover:text-lance-text-md'
             }`}
           >
             <Icon size={15} />
@@ -101,40 +103,37 @@ export default function SetupView() {
         ))}
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto scrollable px-4 py-4">
         {activeTab === 'events' && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <p className="text-xs font-semibold text-lance-text-sub uppercase tracking-wide">
                 {events.length} Event Block{events.length !== 1 ? 's' : ''}
               </p>
               <button
                 onClick={() => setShowForm(v => !v)}
-                className="flex items-center gap-1 text-xs font-semibold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-lg"
+                className="flex items-center gap-1 text-xs font-semibold text-lance-accent bg-lance-accent-dim px-3 py-1.5 rounded-lg"
               >
                 <PlusCircle size={13} /> Add Event
               </button>
             </div>
 
             {showForm && (
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 mb-4">
-                <p className="text-sm font-bold text-slate-700 mb-3">New Event Block</p>
+              <div className="bg-lance-elevated border border-lance-border rounded-xl p-4 mb-4">
+                <p className="text-sm font-bold text-lance-text mb-3">New Event Block</p>
                 <EventForm onClose={() => setShowForm(false)} />
               </div>
             )}
 
             {events.length === 0 && !showForm && (
-              <div className="text-center py-10 text-slate-400">
+              <div className="text-center py-10 text-lance-text-sub">
                 <CalendarDays size={36} className="mx-auto mb-2 opacity-30" />
                 <p className="text-sm">No events added yet</p>
-                <p className="text-xs mt-1">Tap "Add Event" to get started</p>
+                <p className="text-xs mt-1 text-lance-text-sub">Tap "Add Event" to get started</p>
               </div>
             )}
 
-            {events.map(event => (
-              <EventCard key={event.id} event={event} />
-            ))}
+            {events.map(event => <EventCard key={event.id} event={event} />)}
           </div>
         )}
 
@@ -142,18 +141,14 @@ export default function SetupView() {
 
         {activeTab === 'map' && (
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-              Live Floor Plan
-            </p>
+            <p className="text-xs font-semibold text-lance-text-sub uppercase tracking-wide mb-3">Live Floor Plan</p>
             <FloorMap />
           </div>
         )}
 
         {activeTab === 'deploy' && (
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-              Deployment Recommendations
-            </p>
+            <p className="text-xs font-semibold text-lance-text-sub uppercase tracking-wide mb-3">Deployment Recommendations</p>
             <DeployPlan />
           </div>
         )}
