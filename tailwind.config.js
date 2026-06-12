@@ -19,7 +19,7 @@ export default {
           'gold-lt':    '#e8b254',   // lighter gold
           'gold-dim':   '#2e1e06',   // dark gold tint
           teal:         '#315F75',   // dark teal blue (secondary)
-          text:         '#d8ebe5',   // primary text
+          text:         '#eef4f2',   // primary text
           'text-md':    '#8ab4a8',   // secondary text
           'text-sub':   '#4a7068',   // very muted text
         },

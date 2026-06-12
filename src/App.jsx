@@ -18,7 +18,7 @@ export default function App() {
   const guestRoom = useStore(s => s.guestRoom);
   const setGuestRoom = useStore(s => s.setGuestRoom);
 
-  const subtitle = activeTab === 'staff' ? 'Task manager' : null;
+  const subtitle = activeTab === 'staff' ? 'Task manager' : activeTab === 'guest' ? 'Guest services' : null;
 
   return (
     <div className="flex flex-col h-screen bg-lance-bg relative">
@@ -29,7 +29,7 @@ export default function App() {
             <MdVilla size={26} className="text-lance-accent" />
             <div>
               <h1 className="font-bold text-base leading-tight text-lance-text">Claremont Resort & Club</h1>
-              {subtitle && <p className="text-[11px] text-lance-text-sub">{subtitle}</p>}
+              <p className="text-[11px] text-lance-text-sub">{subtitle}</p>
             </div>
           </div>
           {/* Staff: wrench opens setup */}
@@ -112,7 +112,7 @@ export default function App() {
           className="absolute inset-0 z-50 flex flex-col overflow-hidden"
           style={{ background: '#08090a' }}
         >
-          <div className="relative px-4 pt-10 pb-3 flex items-start flex-shrink-0">
+          <div className="relative bg-lance-surface px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">
               <MdManageAccounts size={26} className="text-lance-accent" />
               <div>
@@ -122,7 +122,7 @@ export default function App() {
             </div>
             <button
               onClick={() => setShowSetup(false)}
-              className="absolute top-10 right-4 p-2 text-lance-text-sub hover:text-lance-text transition-colors"
+              className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
               aria-label="Close setup"
             >
               <X size={18} />
