@@ -140,14 +140,8 @@ export default function StaffView() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Sub-tabs — same 3D treatment as bottom nav, no border line */}
-      <div
-        className="flex px-3 py-2 gap-1 flex-shrink-0"
-        style={{
-          background: 'linear-gradient(to bottom, #1f3d38 0%, #0c1918 100%)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-        }}
-      >
+      {/* Sub-tabs */}
+      <div className="flex px-3 py-2 gap-1 flex-shrink-0 bg-lance-bg">
         {[
           { id: 'tasks',  label: `Tasks (${activeTasks.length})`      },
           { id: 'done',   label: `Done (${completedTasks.length})`     },

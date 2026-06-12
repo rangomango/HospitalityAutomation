@@ -43,13 +43,12 @@ export default function App() {
         {activeTab === 'guest' && <GuestView />}
       </main>
 
-      {/* Footer navigation — more contrast gradient + 3D lift */}
+      {/* Footer navigation */}
       <nav
-        className="flex-shrink-0 safe-bottom"
+        className="flex-shrink-0 safe-bottom bg-lance-bg"
         style={{
-          background: 'linear-gradient(to bottom, #1f3d38 0%, #0c1918 100%)',
           borderTop: '1px solid rgba(43,202,149,0.2)',
-          boxShadow: '0 -6px 24px rgba(0,0,0,0.65), 0 -1px 0 rgba(43,202,149,0.08)',
+          boxShadow: '0 -8px 28px rgba(0,0,0,0.7)',
         }}
       >
         <div className="flex">
@@ -102,7 +101,7 @@ export default function App() {
         >
           <div
             className="px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0"
-            style={{ background: '#0e1c1f', borderBottom: '1px solid #1d3535' }}
+            style={{ background: '#0e1c1f', borderBottom: '1px solid rgba(43,202,149,0.2)' }}
           >
             <div className="flex items-center gap-2">
               <Wrench size={16} className="text-lance-accent" />

@@ -9,8 +9,8 @@ export default {
           bg:           '#08090a',   // near-black page background
           surface:      '#0e1c1f',   // card / panel
           elevated:     '#152428',   // slightly lifted surface
-          border:       'rgba(43,202,149,0.2)',    // teal glow border
-          'border-sub': 'rgba(43,202,149,0.1)',   // subtle teal glow border
+          border:       '#2BCA9533',   // teal glow border  ~20% opacity
+          'border-sub': '#2BCA951A',   // subtle teal glow ~10% opacity
           accent:       '#2BCA95',   // primary teal
           'accent-hov': '#23a87c',   // teal hover
           'accent-dim': '#0d3327',   // dark teal background tint
