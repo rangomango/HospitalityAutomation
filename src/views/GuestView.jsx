@@ -70,14 +70,14 @@ function SupplyCard({ type, floor, guestRoom }) {
   const isReminder = myRequest?.status === 'delivered' && myRequest?.reminderSent;
 
   const statusMap = myRequest ? {
-    pending:   { text: `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`, icon: <MdAccessTime size={13} />, cls: 'text-lance-text-sub' },
-    assigned:  { text: 'On the way',  icon: <MdLocalShipping size={13} />, cls: 'text-lance-accent-lt font-medium' },
-    delivered: { text: 'Delivered',   icon: <MdCheckCircle size={13} />,   cls: 'text-lance-text-sub' },
+    pending:   { text: `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`, icon: <MdAccessTime size={13} />,       cls: 'text-lance-text-sub',   iconBg: 'rgba(74,112,104,0.2)' },
+    assigned:  { text: 'On the way',  icon: <MdLocalShipping size={13} />,     cls: 'text-lance-accent-lt',  iconBg: 'rgba(43,202,149,0.15)' },
+    delivered: { text: 'Delivered',   icon: <MdCheckCircle size={13} />,        cls: 'text-lance-text-sub',   iconBg: 'rgba(52,211,153,0.13)' },
     returned:  null,
   }[myRequest.status] : null;
 
   const statusEntry = isReminder
-    ? { text: 'Please place the item outside your door for pickup when done.', icon: <MdNotificationsActive size={13} />, cls: 'text-lance-gold-lt' }
+    ? { text: 'Please place the item outside your door for pickup when done.', icon: <MdNotificationsActive size={13} />, cls: 'text-lance-gold-lt', iconBg: 'rgba(201,144,47,0.18)' }
     : statusMap;
 
   return (
@@ -115,8 +115,13 @@ function SupplyCard({ type, floor, guestRoom }) {
 
       {statusEntry && (
         <div className={`flex items-center gap-3 text-xs mt-1.5 ${statusEntry.cls}`}>
-          <span className="w-6 flex justify-center flex-shrink-0">{statusEntry.icon}</span>
-          <span>{statusEntry.text}</span>
+          <span
+            className="w-6 h-[22px] flex justify-center items-center flex-shrink-0 rounded-md"
+            style={{ background: statusEntry.iconBg }}
+          >
+            {statusEntry.icon}
+          </span>
+          <span className="font-light">{statusEntry.text}</span>
         </div>
       )}
     </div>
