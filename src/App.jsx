@@ -30,7 +30,7 @@ export default function App() {
           </div>
           <button
             onClick={() => setShowSetup(true)}
-            className="p-2 rounded-xl bg-lance-elevated border border-lance-border hover:border-lance-accent text-lance-text-md hover:text-lance-accent transition-colors"
+            className="p-2 text-lance-text-sub hover:text-lance-accent transition-colors"
             aria-label="Open setup"
           >
             <Wrench size={18} />
@@ -107,7 +107,7 @@ export default function App() {
             </div>
             <button
               onClick={() => setShowSetup(false)}
-              className="p-2 rounded-xl bg-lance-elevated border border-lance-border text-lance-text-md hover:text-lance-text transition-colors"
+              className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
               aria-label="Close setup"
             >
               <X size={18} />

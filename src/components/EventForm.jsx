@@ -10,7 +10,8 @@ const empty = {
   bufferHours: 3, floorStart: 1, floorEnd: 1, roomStart: 1, roomEnd: 10,
 };
 
-const inputCls = 'w-full bg-lance-elevated border border-lance-border rounded-lg px-3 py-2 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none focus:ring-1 focus:ring-lance-accent focus:border-lance-accent transition-colors';
+// No border — just elevated bg with a subtle focus glow
+const inputCls = 'w-full bg-lance-elevated rounded-lg px-3 py-2 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none focus:ring-1 focus:ring-lance-accent transition-colors';
 const selectCls = inputCls;
 
 export default function EventForm({ onClose }) {
@@ -112,13 +113,24 @@ export default function EventForm({ onClose }) {
 
       <div className="flex gap-2 pt-1">
         {onClose && (
-          <button type="button" onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-lance-border text-lance-text-md text-sm font-medium hover:border-lance-accent/50 transition-colors">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            style={{ color: '#4a7068', background: 'rgba(0,0,0,0.2)' }}
+          >
             Cancel
           </button>
         )}
-        <button type="submit"
-          className="flex-1 py-2.5 rounded-xl bg-lance-accent text-lance-bg text-sm font-bold flex items-center justify-center gap-1 hover:bg-lance-accent-hov transition-colors">
+        <button
+          type="submit"
+          className="flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-1 transition-all"
+          style={{
+            color: '#2BCA95',
+            background: 'rgba(43,202,149,0.07)',
+            boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
+          }}
+        >
           <PlusCircle size={15} /> Add Event
         </button>
       </div>
