@@ -175,9 +175,26 @@ export default function GuestView() {
       {/* Room header */}
       <div className="px-4 pt-3 pb-2 flex-shrink-0">
         {matchingEvent && (
-          <p className="text-sm font-semibold mb-2 px-1" style={{ color: '#e8b254' }}>
-            Welcome {matchingEvent.name} party
-          </p>
+          <div className="relative rounded-xl overflow-hidden mb-2" style={{ background: 'rgba(20,10,4,0.9)' }}>
+            <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" aria-hidden>
+              {[
+                {cx:'3%',cy:'30%',r:2},{cx:'7%',cy:'72%',r:3.5},{cx:'11%',cy:'20%',r:1.5},{cx:'14%',cy:'55%',r:4},
+                {cx:'18%',cy:'85%',r:2.5},{cx:'22%',cy:'38%',r:5},{cx:'26%',cy:'65%',r:2},{cx:'29%',cy:'15%',r:3},
+                {cx:'33%',cy:'80%',r:1.5},{cx:'37%',cy:'45%',r:4.5},{cx:'41%',cy:'25%',r:2},{cx:'44%',cy:'70%',r:3},
+                {cx:'48%',cy:'90%',r:1.5},{cx:'51%',cy:'40%',r:5.5},{cx:'55%',cy:'60%',r:2},{cx:'58%',cy:'20%',r:3.5},
+                {cx:'62%',cy:'75%',r:2.5},{cx:'65%',cy:'50%',r:4},{cx:'69%',cy:'85%',r:1.5},{cx:'72%',cy:'30%',r:3},
+                {cx:'76%',cy:'65%',r:5},{cx:'79%',cy:'15%',r:2},{cx:'83%',cy:'55%',r:3.5},{cx:'86%',cy:'80%',r:2},
+                {cx:'90%',cy:'35%',r:4},{cx:'93%',cy:'70%',r:1.5},{cx:'97%',cy:'50%',r:3},
+                {cx:'5%',cy:'55%',r:1.5},{cx:'16%',cy:'28%',r:2},{cx:'35%',cy:'60%',r:2},{cx:'53%',cy:'82%',r:2.5},
+                {cx:'67%',cy:'40%',r:1.5},{cx:'81%',cy:'22%',r:2.5},{cx:'95%',cy:'75%',r:2},
+              ].map((d, i) => (
+                <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill={`rgba(232,178,84,${0.15 + (d.r / 30)})`} />
+              ))}
+            </svg>
+            <p className="relative z-10 text-sm font-semibold px-4 py-2.5" style={{ color: '#ff3385' }}>
+              Welcome {matchingEvent.name} party
+            </p>
+          </div>
         )}
         <div className="bg-lance-surface rounded-xl px-4 py-3 flex items-center justify-between">
           <div>
