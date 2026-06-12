@@ -124,7 +124,7 @@ function NotificationItem({ notif }) {
   }[notif.type] || 'bg-lance-surface';
 
   return (
-    <div className={`rounded-xl border p-3 mb-2 transition-opacity ${notif.read ? 'opacity-50' : ''} ${bgStyle}`}>
+    <div className={`rounded-xl p-3 mb-2 transition-opacity ${notif.read ? 'opacity-50' : ''} ${bgStyle}`}>
       <div className="flex items-start gap-2">
         <span className="mt-0.5 flex-shrink-0">{NOTIF_ICONS[notif.type] || <Bell size={14} />}</span>
         <div className="flex-1 min-w-0">

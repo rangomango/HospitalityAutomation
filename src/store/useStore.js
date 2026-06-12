@@ -118,7 +118,7 @@ export const useStore = create(
             if (plan.shortage > 0) {
               get()._notify({
                 type: 'conflict',
-                message: `Not enough ${plan.typeName}s for Floor ${plan.toFloor} (${plan.eventName}) — none available to move. Source ${plan.shortage} more.`,
+                message: `Potential shortage on Floor ${plan.toFloor} for ${plan.eventName} — no ${plan.typeName}s available to move. Consider sourcing ${plan.shortage} more.`,
               });
             }
             return;
@@ -149,7 +149,7 @@ export const useStore = create(
           if (plan.shortage > 0) {
             get()._notify({
               type: 'conflict',
-              message: `Partial stock: Moving ${freshUnits.length} of ${plan.toSend} ${plan.typeName}s to Floor ${plan.toFloor}. Still need ${plan.shortage} more for ${plan.eventName}.`,
+              message: `Potential shortage: Moving ${freshUnits.length} of ${plan.toSend} ${plan.typeName}${plan.toSend !== 1 ? 's' : ''} to Floor ${plan.toFloor} for ${plan.eventName} — ${plan.shortage} more may be needed.`,
             });
           }
         });
@@ -287,7 +287,7 @@ export const useStore = create(
           if (totalNeeded > totalHave) {
             get()._notify({
               type: 'conflict',
-              message: `Shortage: ${totalNeeded} ${type.name}s needed across all events but only ${totalHave} in stock. Source ${totalNeeded - totalHave} more.`,
+              message: `Potential shortage: ${totalNeeded} ${type.name}${totalNeeded !== 1 ? 's' : ''} needed across all events, but only ${totalHave} in stock — ${totalNeeded - totalHave} more may be needed.`,
             });
           }
         });

@@ -62,7 +62,7 @@ function EventCard({ event }) {
             <p className="text-xs text-lance-text-md flex items-center gap-1.5"><MdCalendarMonth size={12} /> {event.date} at {event.startTime}</p>
             <p className="text-xs text-lance-text-md flex items-center gap-1.5"><MdLocalShipping size={12} /> Deploy by {deployTime} ({event.bufferHours}h buffer)</p>
             <p className="text-xs text-lance-text-md">
-              {event.rooms?.length || 0} rooms · Floors {floors.join(', ')} · ~{suppliesNeeded} units/type needed
+              {(() => { const n = event.rooms?.length || 0; return `${n} ${n !== 1 ? 'rooms' : 'room'} · ${floors.length !== 1 ? 'Floors' : 'Floor'} ${floors.join(', ')} · ~${suppliesNeeded} ${suppliesNeeded !== 1 ? 'units' : 'unit'}/type needed`; })()}
             </p>
           </div>
         </div>

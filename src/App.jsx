@@ -24,7 +24,7 @@ export default function App() {
           <div className="flex items-center gap-2.5">
             <MdHotel size={26} className="text-lance-accent" />
             <div>
-              <h1 className="font-bold text-base leading-tight text-lance-text">Hotel Supply Hub</h1>
+              <h1 className="font-bold text-base leading-tight text-lance-text">Hotel Readiness</h1>
               <p className="text-lance-text-sub text-xs">Supply Management</p>
             </div>
           </div>

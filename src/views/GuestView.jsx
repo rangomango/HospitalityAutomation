@@ -161,10 +161,12 @@ function DevPanel({ guestRoom }) {
 export default function GuestView() {
   const guestRoom = useStore(s => s.guestRoom);
   const setGuestRoom = useStore(s => s.setGuestRoom);
+  const events = useStore(s => s.events);
 
   if (!guestRoom) return <RoomEntry />;
 
   const floor = Math.floor(guestRoom / 100);
+  const matchingEvent = events.find(e => e.rooms?.includes(guestRoom));
   const garmentCare = SUPPLY_TYPES.filter(t => t.category === 'room_equipment');
   const personalCare = SUPPLY_TYPES.filter(t => t.category === 'personal_care');
 
@@ -172,6 +174,11 @@ export default function GuestView() {
     <div className="flex flex-col h-full">
       {/* Room header */}
       <div className="px-4 pt-3 pb-2 flex-shrink-0">
+        {matchingEvent && (
+          <p className="text-[11px] font-medium text-lance-gold-lt mb-2 px-1">
+            Welcome {matchingEvent.name} party
+          </p>
+        )}
         <div className="bg-lance-surface rounded-xl px-4 py-3 flex items-center justify-between">
           <div>
             <p className="text-xs text-lance-text-sub font-medium">Your Room</p>
