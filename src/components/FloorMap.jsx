@@ -1,5 +1,6 @@
 import { useStore } from '../store/useStore';
-import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
+import { SUPPLY_TYPES } from '../data/constants';
+import { SupplyIcon, SUPPLY_ABBR } from './SupplyIcon';
 
 // SVG layout constants
 const ROOM_W = 26;
@@ -32,21 +33,22 @@ const C = {
   eventBdr:  '#C9902F',
 };
 
+const DOT_COLORS = {
+  iron:          '#6366f1',
+  iron_board:    '#C9902F',
+  steamer:       '#2BCA95',
+  toothbrush:    '#10b981',
+  razor:         '#ef4444',
+  shaving_cream: '#8b5cf6',
+};
+
 function SupplyDot({ typeId, x, y }) {
-  const colors = {
-    iron:          '#6366f1',
-    iron_board:    '#C9902F',
-    steamer:       '#2BCA95',
-    toothbrush:    '#10b981',
-    razor:         '#ef4444',
-    shaving_cream: '#8b5cf6',
-  };
-  const emoji = SUPPLY_TYPE_MAP[typeId]?.emoji || '📦';
+  const abbr = SUPPLY_ABBR[typeId] || '??';
   return (
     <g>
-      <circle cx={x} cy={y} r={7} fill={colors[typeId] || C.textSub} opacity={0.9} />
-      <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill="white">
-        {emoji}
+      <circle cx={x} cy={y} r={7} fill={DOT_COLORS[typeId] || C.textSub} opacity={0.9} />
+      <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="5.5" fontWeight="700" fill="white">
+        {abbr}
       </text>
     </g>
   );
@@ -169,8 +171,7 @@ export default function FloorMap() {
 
           {/* Stairwell/elevator */}
           <rect x={0} y={TOP_Y} width={LEFT_PAD - 4} height={closetH} rx={4} fill={C.surface} stroke={C.border} strokeWidth={1} />
-          <text x={(LEFT_PAD - 4) / 2} y={TOP_Y + closetH / 2 - 4} textAnchor="middle" fontSize="8" fill={C.textMd}>🛗</text>
-          <text x={(LEFT_PAD - 4) / 2} y={TOP_Y + closetH / 2 + 7} textAnchor="middle" fontSize="6" fill={C.textSub}>ELEV</text>
+          <text x={(LEFT_PAD - 4) / 2} y={TOP_Y + closetH / 2} textAnchor="middle" dominantBaseline="middle" fontSize="6" fontWeight="700" fill={C.textMd} letterSpacing={0.5}>ELEV</text>
 
           {/* Top row: rooms 1–10 */}
           {Array.from({ length: 10 }, (_, i) => {
@@ -229,7 +230,7 @@ export default function FloorMap() {
           return (
             <div key={type.id} className="flex items-center justify-between py-1.5 border-b border-lance-border-sub last:border-0">
               <span className="text-sm text-lance-text flex items-center gap-1.5">
-                <span>{type.emoji}</span> {type.name}
+                <SupplyIcon typeId={type.id} size={15} className="text-lance-accent" /> {type.name}
               </span>
               <div className="flex gap-3 text-xs">
                 <span className="text-lance-accent font-semibold">{count} in closet</span>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Truck, AlertTriangle, CheckCircle, ChevronRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { format } from 'date-fns';
+import { SupplyIcon } from './SupplyIcon';
 
 export default function DeployPlan() {
   const plan = useStore(s => s.getDeployPlan());
@@ -52,8 +53,8 @@ export default function DeployPlan() {
             <p className="text-sm font-bold text-red-300">Supply Shortages Detected</p>
           </div>
           {conflicts.map((p, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs text-red-400 py-1 border-b border-red-900/30 last:border-0">
-              <span>{p.emoji}</span>
+            <div key={i} className="flex items-center gap-2 text-xs text-red-400 py-1">
+              <SupplyIcon typeId={p.typeId} size={14} className="text-red-400 flex-shrink-0" />
               <span>
                 Floor {p.toFloor} needs {p.toSend}× {p.typeName} but only {p.canFulfill} available.
                 <span className="font-bold text-red-300"> Source {p.shortage} more.</span>
@@ -79,11 +80,11 @@ export default function DeployPlan() {
               </div>
               <ChevronRight size={16} className="text-lance-text-sub" />
             </div>
-            <div className="divide-y divide-lance-border-sub">
+            <div>
               {items.map((p, i) => (
                 <div key={i} className="px-3 py-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-base">{p.emoji}</span>
+                    <SupplyIcon typeId={p.typeId} size={18} className="text-lance-accent flex-shrink-0" />
                     <div>
                       <p className="text-sm text-lance-text">{p.typeName}</p>
                       <p className="text-[10px] text-lance-text-sub">→ Floor {p.toFloor} closet</p>

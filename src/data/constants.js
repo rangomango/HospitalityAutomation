@@ -1,12 +1,12 @@
 export const SUPPLY_TYPES = [
   // Room Equipment
-  { id: 'iron',       name: 'Iron',          category: 'room_equipment', emoji: '🧲', svgIcon: 'iron'    },
-  { id: 'iron_board', name: 'Ironing Board', category: 'room_equipment', emoji: '📐', svgIcon: 'board'   },
-  { id: 'steamer',    name: 'Steamer',        category: 'room_equipment', emoji: '💨', svgIcon: 'steamer' },
+  { id: 'iron',          name: 'Iron',          category: 'room_equipment' },
+  { id: 'iron_board',    name: 'Ironing Board', category: 'room_equipment' },
+  { id: 'steamer',       name: 'Steamer',       category: 'room_equipment' },
   // Personal Care
-  { id: 'toothbrush',    name: 'Toothbrush',    category: 'personal_care', emoji: '🪥' },
-  { id: 'razor',         name: 'Razor',          category: 'personal_care', emoji: '🪒' },
-  { id: 'shaving_cream', name: 'Shaving Cream',  category: 'personal_care', emoji: '🫧' },
+  { id: 'toothbrush',    name: 'Toothbrush',    category: 'personal_care'  },
+  { id: 'razor',         name: 'Razor',         category: 'personal_care'  },
+  { id: 'shaving_cream', name: 'Shaving Cream', category: 'personal_care'  },
 ];
 
 export const SUPPLY_TYPE_MAP = Object.fromEntries(SUPPLY_TYPES.map(t => [t.id, t]));

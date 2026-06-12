@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Users, User, Wrench, X } from 'lucide-react';
+import { MdHotel } from 'react-icons/md';
 import { useStore, selectors } from './store/useStore';
 import SetupView from './views/SetupView';
 import StaffView from './views/StaffView';
@@ -18,10 +19,10 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen bg-lance-bg relative">
       {/* Header */}
-      <header className="bg-lance-surface border-b border-lance-border px-4 pt-10 pb-3 flex-shrink-0">
+      <header className="bg-lance-surface px-4 pt-10 pb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="text-2xl">🏨</span>
+            <MdHotel size={26} className="text-lance-accent" />
             <div>
               <h1 className="font-bold text-base leading-tight text-lance-text">Hotel Supply Hub</h1>
               <p className="text-lance-text-sub text-xs">Supply Management</p>
@@ -46,10 +47,7 @@ export default function App() {
       {/* Footer navigation */}
       <nav
         className="flex-shrink-0 safe-bottom bg-lance-bg"
-        style={{
-          borderTop: '1px solid rgba(43,202,149,0.2)',
-          boxShadow: '0 -8px 28px rgba(0,0,0,0.7)',
-        }}
+        style={{ boxShadow: '0 -8px 28px rgba(0,0,0,0.7)' }}
       >
         <div className="flex">
           {TABS.map(({ id, label, Icon }) => {

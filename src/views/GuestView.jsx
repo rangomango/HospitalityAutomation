@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Package, CheckCircle, Clock, ArrowRight, X, Bell } from 'lucide-react';
+import { MdHotel } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
+import { SupplyIcon } from '../components/SupplyIcon';
 import { formatDistanceToNow } from 'date-fns';
 
 function RoomEntry() {
@@ -27,7 +29,7 @@ function RoomEntry() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-8 text-center">
-      <div className="text-5xl mb-4">🏨</div>
+      <MdHotel size={52} className="text-lance-accent mb-4" />
       <h2 className="text-xl font-bold text-lance-text mb-1">Welcome</h2>
       <p className="text-sm text-lance-text-md mb-6">Enter your room number to see available supplies and request items.</p>
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
@@ -80,7 +82,7 @@ function SupplyCard({ type, floor, guestRoom }) {
   return (
     <div className="bg-lance-surface border border-lance-border rounded-xl p-3 mb-2">
       <div className="flex items-center gap-3">
-        <span className="text-2xl">{type.emoji}</span>
+        <SupplyIcon typeId={type.id} size={24} className="text-lance-accent flex-shrink-0" />
         <div className="flex-1">
           <p className="font-semibold text-lance-text text-sm">{type.name}</p>
           <p className="text-xs text-lance-text-sub mt-0.5">

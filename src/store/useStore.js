@@ -290,7 +290,7 @@ export const useStore = create(
                 eventName: event.name,
                 typeId: type.id,
                 typeName: type.name,
-                emoji: type.emoji,
+                typeId: type.id,
                 toFloor: floor,
                 needed,
                 alreadyOnFloor,

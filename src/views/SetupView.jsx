@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CalendarDays, Package, Map, Truck, PlusCircle, Trash2, Zap } from 'lucide-react';
+import { MdCelebration, MdCalendarMonth, MdLocalShipping } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import EventForm from '../components/EventForm';
 import SupplyInventory from '../components/SupplyInventory';
@@ -36,15 +37,15 @@ function EventCard({ event }) {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-base">🎉</span>
+            <MdCelebration size={18} className="text-lance-gold-lt flex-shrink-0" />
             <p className="font-semibold text-lance-text text-sm">{event.name}</p>
             <span className="text-[10px] bg-lance-gold-dim text-lance-gold-lt rounded-full px-2 py-0.5 font-medium">
               {event.type}
             </span>
           </div>
           <div className="mt-1.5 space-y-0.5">
-            <p className="text-xs text-lance-text-md">📅 {event.date} at {event.startTime}</p>
-            <p className="text-xs text-lance-text-md">🚚 Deploy by {deployTime} ({event.bufferHours}h buffer)</p>
+            <p className="text-xs text-lance-text-md flex items-center gap-1.5"><MdCalendarMonth size={12} /> {event.date} at {event.startTime}</p>
+            <p className="text-xs text-lance-text-md flex items-center gap-1.5"><MdLocalShipping size={12} /> Deploy by {deployTime} ({event.bufferHours}h buffer)</p>
             <p className="text-xs text-lance-text-md">
               🏨 {event.rooms?.length || 0} rooms · Floors {floors.join(', ')} · ~{suppliesNeeded} units/type needed
             </p>
