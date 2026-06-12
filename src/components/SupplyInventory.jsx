@@ -55,7 +55,7 @@ export default function SupplyInventory() {
   const [selectedFloor, setSelectedFloor] = useState(1);
   const supplyUnits = useStore(s => s.supplyUnits);
   const clearInventory = useStore(s => s.clearInventory);
-  const totalByType = (typeId) => supplyUnits.filter(u => u.typeId === typeId && u.status !== 'in_transit').length;
+  const totalByType = (typeId) => supplyUnits.filter(u => u.typeId === typeId).length;
 
   return (
     <div>

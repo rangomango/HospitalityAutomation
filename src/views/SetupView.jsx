@@ -10,8 +10,8 @@ import { SUPPLY_TYPE_MAP } from '../data/constants';
 
 const TABS = [
   { id: 'events',    label: 'Events',    Icon: CalendarDays },
-  { id: 'inventory', label: 'Inventory', Icon: Package      },
   { id: 'map',       label: 'Floor Map', Icon: Map          },
+  { id: 'inventory', label: 'Inventory', Icon: Package      },
   { id: 'deploy',    label: 'Deploy',    Icon: Truck        },
 ];
 

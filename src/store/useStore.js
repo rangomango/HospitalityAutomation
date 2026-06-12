@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
+import { SUPPLY_TYPES, SUPPLY_TYPE_MAP, pluralName } from '../data/constants';
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -111,6 +111,7 @@ export const useStore = create(
       // Create forward-deploy tasks from deploy plan.
       // Re-reads supplyUnits each iteration so in_transit marks from prior iterations
       // don't cause the same unit to be assigned twice.
+      // Creates one task per source floor so staff know exactly where to pick up from.
       createDeployTasks(plans) {
         let tasksCreated = 0;
         plans.forEach(plan => {
@@ -118,7 +119,7 @@ export const useStore = create(
             if (plan.shortage > 0) {
               get()._notify({
                 type: 'conflict',
-                message: `Potential shortage on Floor ${plan.toFloor} for ${plan.eventName} — no ${plan.typeName}s available to move. Consider sourcing ${plan.shortage} more.`,
+                message: `Potential shortage on Floor ${plan.toFloor} for ${plan.eventName} — no ${pluralName(plan.typeId, 2)} available to move. Consider sourcing ${plan.shortage} more.`,
               });
             }
             return;
@@ -129,27 +130,33 @@ export const useStore = create(
             .slice(0, plan.canFulfill);
           if (!freshUnits.length) return;
 
-          get()._createTask({
-            type: 'forward_deploy',
-            label: `Move ${freshUnits.length} ${plan.typeName}${freshUnits.length !== 1 ? 's' : ''} to Floor ${plan.toFloor} in preparation for the ${plan.eventName}`,
-            supplyUnitIds: freshUnits.map(u => u.id),
-            fromFloor: freshUnits[0].floor,
-            fromLocation: 'closet',
-            toFloor: plan.toFloor,
-            toLocation: 'closet',
-            deadline: plan.deadline,
-            requestId: null,
+          // Group by source floor — create a separate task per source floor
+          const byFloor = {};
+          freshUnits.forEach(u => {
+            if (!byFloor[u.floor]) byFloor[u.floor] = [];
+            byFloor[u.floor].push(u);
           });
 
-          // Move floor immediately so source floor count drops when task is created,
-          // not only when completed. Destination shows them as 'in_transit' (incoming).
-          freshUnits.forEach(u => get()._updateUnit(u.id, { status: 'in_transit', floor: plan.toFloor }));
+          Object.entries(byFloor).forEach(([srcFloor, units]) => {
+            get()._createTask({
+              type: 'forward_deploy',
+              label: `Move ${units.length} ${pluralName(plan.typeId, units.length)} from Floor ${srcFloor} to Floor ${plan.toFloor} in preparation for the ${plan.eventName}`,
+              supplyUnitIds: units.map(u => u.id),
+              fromFloor: parseInt(srcFloor),
+              fromLocation: 'closet',
+              toFloor: plan.toFloor,
+              toLocation: 'closet',
+              deadline: plan.deadline,
+              requestId: null,
+            });
+            units.forEach(u => get()._updateUnit(u.id, { status: 'in_transit', floor: plan.toFloor }));
+          });
           tasksCreated++;
 
           if (plan.shortage > 0) {
             get()._notify({
               type: 'conflict',
-              message: `Potential shortage: Moving ${freshUnits.length} of ${plan.toSend} ${plan.typeName}${plan.toSend !== 1 ? 's' : ''} to Floor ${plan.toFloor} for ${plan.eventName} — ${plan.shortage} more may be needed.`,
+              message: `Potential shortage: Moving ${freshUnits.length} of ${plan.toSend} ${pluralName(plan.typeId, plan.toSend)} to Floor ${plan.toFloor} for ${plan.eventName} — ${plan.shortage} more may be needed.`,
             });
           }
         });
@@ -287,7 +294,7 @@ export const useStore = create(
           if (totalNeeded > totalHave) {
             get()._notify({
               type: 'conflict',
-              message: `Potential shortage: ${totalNeeded} ${type.name}${totalNeeded !== 1 ? 's' : ''} needed across all events, but only ${totalHave} in stock — ${totalNeeded - totalHave} more may be needed.`,
+              message: `Potential shortage: ${totalNeeded} ${pluralName(type.id, totalNeeded)} needed across all events, but only ${totalHave} in stock — ${totalNeeded - totalHave} more may be needed.`,
             });
           }
         });
@@ -330,7 +337,6 @@ export const useStore = create(
                 eventName: event.name,
                 typeId: type.id,
                 typeName: type.name,
-                typeId: type.id,
                 toFloor: floor,
                 needed,
                 alreadyOnFloor,
