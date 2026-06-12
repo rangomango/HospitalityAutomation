@@ -1,5 +1,5 @@
 import { ArrowRight, ArrowLeft, Plus, Minus } from 'lucide-react';
-import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive, MdRoomService, MdExplore } from 'react-icons/md';
+import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive, MdRoomService, MdExplore, MdRestaurant, MdLocalCafe, MdPark, MdMuseum, MdDirectionsWalk, MdOpenInNew } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
 import { SupplyIcon } from '../components/SupplyIcon';
@@ -275,6 +275,53 @@ function RoomServiceView({ guestRoom, onClose }) {
   );
 }
 
+const LOCAL_GUIDE = [
+  {
+    category: 'Dining',
+    Icon: MdRestaurant,
+    places: [
+      { name: 'Chez Panisse',        desc: 'Iconic farm-to-table fine dining by Alice Waters',  dist: '1.5 mi' },
+      { name: 'Cheeseboard Pizza',   desc: 'Beloved vegetarian pizza collective, always a line', dist: '1.8 mi' },
+      { name: 'The Ramen Shop',      desc: 'Japanese ramen with local California ingredients',   dist: '2.1 mi' },
+      { name: 'Gather Restaurant',   desc: 'Plant-forward seasonal menu, great cocktails',       dist: '1.9 mi' },
+    ],
+  },
+  {
+    category: 'Coffee & Cafés',
+    Icon: MdLocalCafe,
+    places: [
+      { name: 'Elmwood Café',        desc: 'Cozy neighborhood spot, excellent espresso',         dist: '1.6 mi' },
+      { name: 'Philz Coffee',        desc: 'Hand-crafted pour-over with creative blends',        dist: '2.3 mi' },
+    ],
+  },
+  {
+    category: 'Outdoors',
+    Icon: MdPark,
+    places: [
+      { name: 'Tilden Regional Park', desc: 'Scenic trails, lake, botanical garden & golf',     dist: '1.5 mi' },
+      { name: 'Lake Merritt',         desc: 'Scenic urban lake with 3.4-mile walking path',     dist: '3.2 mi' },
+      { name: 'Claremont Canyon',     desc: 'Trailhead steps from the resort, panoramic views', dist: '0.2 mi' },
+    ],
+  },
+  {
+    category: 'Culture',
+    Icon: MdMuseum,
+    places: [
+      { name: 'Oakland Museum of CA', desc: 'Art, history & natural science under one roof',    dist: '3.5 mi' },
+      { name: 'UC Botanical Garden',  desc: '34-acre garden with 13,000 plant species',         dist: '1.2 mi' },
+      { name: 'Berkeley Art Museum',  desc: 'Contemporary & modern art on the UC campus',       dist: '2.0 mi' },
+    ],
+  },
+  {
+    category: 'Shopping',
+    Icon: MdDirectionsWalk,
+    places: [
+      { name: 'Rockridge Market Hall', desc: 'Artisan food shops, butcher, bakery & wine',      dist: '2.0 mi' },
+      { name: 'College Ave Strip',     desc: 'Independent boutiques, bookstores & cafés',       dist: '1.7 mi' },
+    ],
+  },
+];
+
 function LocalGuideView({ onClose }) {
   return (
     <div className="absolute inset-0 z-10 flex flex-col" style={{ background: '#08090a' }}>
@@ -286,28 +333,47 @@ function LocalGuideView({ onClose }) {
           <ArrowLeft size={18} />
         </button>
         <MdExplore size={20} className="text-lance-accent" />
-        <h2 className="font-bold text-base text-lance-text">Local Guide</h2>
+        <div>
+          <h2 className="font-bold text-base leading-tight text-lance-text">Local Guide</h2>
+          <p className="text-[11px] text-lance-text-sub">Berkeley Hills &amp; Oakland</p>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <iframe
-          src="https://maps.app.goo.gl/F5MJeeQj39ySxcGn7"
-          className="w-full h-full border-0"
-          title="Claremont Local Guide"
-          allow="geolocation"
-        />
-      </div>
-
-      <div className="px-4 py-3 flex-shrink-0 bg-lance-surface">
+      <div className="flex-1 overflow-y-auto scrollable px-4 pb-4">
         <a
           href="https://maps.app.goo.gl/F5MJeeQj39ySxcGn7"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"
-          style={{ color: '#2BCA95', background: 'rgba(43,202,149,0.07)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }}
+          className="flex items-center justify-between w-full mt-3 mb-4 px-4 py-3 rounded-xl"
+          style={{ background: 'rgba(43,202,149,0.07)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }}
         >
-          <MdExplore size={15} /> Open in Google Maps
+          <div className="flex items-center gap-2.5">
+            <MdExplore size={18} className="text-lance-accent" />
+            <div>
+              <p className="text-xs font-bold text-lance-accent">View full guide on Google Maps</p>
+              <p className="text-[10px] text-lance-text-sub">Curated by Claremont Resort</p>
+            </div>
+          </div>
+          <MdOpenInNew size={14} className="text-lance-text-sub flex-shrink-0" />
         </a>
+
+        {LOCAL_GUIDE.map(({ category, Icon, places }) => (
+          <div key={category} className="mb-4">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Icon size={13} className="text-lance-accent" />
+              <p className="text-[11px] font-bold text-lance-accent uppercase tracking-wide">{category}</p>
+            </div>
+            {places.map(place => (
+              <div key={place.name} className="bg-lance-surface rounded-xl px-3 py-2.5 mb-1.5 flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-lance-text">{place.name}</p>
+                  <p className="text-[11px] text-lance-text-sub mt-0.5 leading-snug">{place.desc}</p>
+                </div>
+                <span className="text-[10px] text-lance-text-sub font-medium flex-shrink-0 mt-0.5">{place.dist}</span>
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
