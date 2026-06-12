@@ -152,14 +152,29 @@ export default function StaffView() {
       {/* Sub-tabs */}
       <div className="flex px-3 py-2 gap-1 flex-shrink-0 bg-lance-bg">
         {[
-          { id: 'tasks',  label: `Tasks (${activeTasks.length})`      },
-          { id: 'done',   label: `Done (${completedTasks.length})`     },
-          { id: 'notifs', label: unread > 0 ? `Alerts (${unread})` : 'Alerts' },
+          {
+            id: 'tasks',
+            label: 'Tasks',
+            badge: activeTasks.length,
+            badgeStyle: { background: 'rgba(245,158,11,0.3)', color: '#fcd34d' },
+          },
+          {
+            id: 'done',
+            label: 'Done',
+            badge: completedTasks.length,
+            badgeStyle: { background: 'rgba(52,211,153,0.2)', color: '#6ee7b7' },
+          },
+          {
+            id: 'notifs',
+            label: 'Alerts',
+            badge: unread,
+            badgeStyle: { background: 'rgba(239,68,68,0.3)', color: '#fca5a5' },
+          },
         ].map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all relative overflow-hidden"
+            className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
             style={tab === t.id ? {
               color: '#2BCA95',
               background: 'rgba(43,202,149,0.07)',
@@ -170,6 +185,14 @@ export default function StaffView() {
             }}
           >
             {t.label}
+            {t.badge > 0 && (
+              <span
+                className="text-[9px] font-bold rounded-full px-1.5 leading-4 min-w-[16px] text-center"
+                style={t.badgeStyle}
+              >
+                {t.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>
