@@ -34,25 +34,21 @@ function TaskCard({ task }) {
     retrieve:       'Item Retrieval',
   }[task.type] || task.type;
 
-  // Status tints — no border, background conveys state
-  const statusBg = {
-    pending:   'rgba(201,144,47,0.08)',
-    accepted:  'rgba(43,202,149,0.08)',
-    completed: 'rgba(16,185,129,0.05)',
-  }[task.status] || 'transparent';
-
-  const statusBadge = {
-    pending:   'bg-lance-gold-dim text-lance-gold-lt',
-    accepted:  'bg-lance-accent-dim text-lance-accent-lt',
-    completed: 'bg-emerald-900/50 text-emerald-400',
-  }[task.status] || '';
+  const statusBadgeStyle = {
+    pending:   { background: 'rgba(245,158,11,0.28)',  color: '#fcd34d' },
+    accepted:  { background: 'rgba(43,202,149,0.28)',  color: '#5eead4' },
+    completed: { background: 'rgba(52,211,153,0.22)',  color: '#6ee7b7' },
+  }[task.status] || {};
 
   return (
-    <div className="rounded-xl p-3 mb-2" style={{ background: statusBg }}>
+    <div className="rounded-xl p-3 mb-2 bg-lance-surface">
       <div className="flex items-center gap-2 mb-1.5">
         {TYPE_ICON[task.type]}
         <p className="text-[10px] font-bold uppercase tracking-wide text-lance-text-sub">{typeLabel}</p>
-        <span className={`ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusBadge}`}>
+        <span
+          className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
+          style={statusBadgeStyle}
+        >
           {task.status.toUpperCase()}
         </span>
       </div>
