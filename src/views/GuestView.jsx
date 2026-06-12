@@ -1,4 +1,4 @@
-import { Package, CheckCircle, Clock, ArrowRight, X, Bell } from 'lucide-react';
+import { ArrowRight, X, Bell } from 'lucide-react';
 import { MdHotel } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
@@ -57,21 +57,6 @@ function RoomEntry() {
   );
 }
 
-function StatusBadge({ status }) {
-  const map = {
-    pending:   { label: 'On the way',  cls: 'bg-lance-gold-dim text-lance-gold-lt',     icon: <Clock size={11} /> },
-    assigned:  { label: 'Assigned',    cls: 'bg-lance-accent-dim text-lance-accent-lt', icon: <Clock size={11} /> },
-    delivered: { label: 'Delivered',   cls: 'bg-emerald-900/50 text-emerald-400',        icon: <CheckCircle size={11} /> },
-    returned:  { label: 'Returned',    cls: 'bg-lance-elevated text-lance-text-sub',     icon: <CheckCircle size={11} /> },
-  };
-  const { label, cls, icon } = map[status] || map.pending;
-  return (
-    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full ${cls}`}>
-      {icon} {label}
-    </span>
-  );
-}
-
 function SupplyCard({ type, floor, guestRoom }) {
   const requests = useStore(s => s.requests);
   const createRequest = useStore(s => s.createRequest);
@@ -81,7 +66,13 @@ function SupplyCard({ type, floor, guestRoom }) {
     r => r.guestRoom === guestRoom && r.typeId === type.id && r.status !== 'returned'
   );
   const canCancel = myRequest && (myRequest.status === 'pending' || myRequest.status === 'assigned');
-  const isDelivered = myRequest?.status === 'delivered' || myRequest?.status === 'returned';
+
+  const statusText = {
+    pending:   `Requested ${formatDistanceToNow(myRequest?.requestedAt, { addSuffix: true })}`,
+    assigned:  'On the way',
+    delivered: 'Delivered',
+    returned:  null,
+  }[myRequest?.status];
 
   return (
     <div className="bg-lance-surface rounded-xl p-3 mb-2">
@@ -90,10 +81,8 @@ function SupplyCard({ type, floor, guestRoom }) {
         <div className="flex-1">
           <p className="font-semibold text-lance-text text-sm">{type.name}</p>
         </div>
-        <div className="text-right flex-shrink-0">
-          {myRequest ? (
-            <StatusBadge status={myRequest.status} />
-          ) : (
+        <div className="flex-shrink-0">
+          {!myRequest && (
             <button
               onClick={() => createRequest(guestRoom, floor, type.id)}
               className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
@@ -106,26 +95,23 @@ function SupplyCard({ type, floor, guestRoom }) {
               Request
             </button>
           )}
+          {canCancel && (
+            <button
+              onClick={() => cancelRequest(myRequest.id)}
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all"
+              style={{ color: '#4a7068', background: 'rgba(0,0,0,0.2)' }}
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </div>
 
-      {myRequest && (
-        <div className="mt-2">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-lance-text-sub">
-              {!isDelivered && `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`}
-              {myRequest.deliveredAt && `Delivered ${formatDistanceToNow(myRequest.deliveredAt, { addSuffix: true })}`}
-            </p>
-            {canCancel && (
-              <button
-                onClick={() => cancelRequest(myRequest.id)}
-                className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 transition-all"
-                style={{ color: '#4a7068', background: 'rgba(0,0,0,0.2)' }}
-              >
-                Cancel
-              </button>
-            )}
-          </div>
+      {myRequest && statusText && (
+        <div className="mt-1.5">
+          <p className={`text-xs ${myRequest.status === 'assigned' ? 'text-lance-accent-lt font-medium' : 'text-lance-text-sub'}`}>
+            {statusText}
+          </p>
           {myRequest.status === 'delivered' && myRequest.reminderSent && (
             <div className="mt-1.5 bg-lance-gold-dim border border-lance-gold/30 rounded-lg p-2 text-xs text-lance-gold-lt">
               <Bell size={11} className="inline mr-1" />
