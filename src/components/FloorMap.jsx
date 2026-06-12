@@ -1,6 +1,6 @@
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES } from '../data/constants';
-import { SupplyIcon, SUPPLY_ABBR } from './SupplyIcon';
+import { SupplyIcon } from './SupplyIcon';
 
 // SVG layout constants
 const ROOM_W = 26;
@@ -33,42 +33,50 @@ const C = {
   eventBdr:  '#C9902F',
 };
 
-const DOT_COLORS = {
-  iron:          '#6366f1',
-  iron_board:    '#C9902F',
-  steamer:       '#2BCA95',
-  toothbrush:    '#10b981',
-  razor:         '#ef4444',
-  shaving_cream: '#8b5cf6',
-};
+const CLOSET_ICON = 12;  // icon size inside closet (SVG user units)
+const ROOM_ICON   = 7;   // icon size inside room
 
-function SupplyDot({ typeId, x, y }) {
-  const abbr = SUPPLY_ABBR[typeId] || '??';
+// Renders an MD icon via foreignObject so it works inside SVG
+function SvgIcon({ typeId, x, y, size, color }) {
   return (
-    <g>
-      <circle cx={x} cy={y} r={7} fill={DOT_COLORS[typeId] || C.textSub} opacity={0.9} />
-      <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="5.5" fontWeight="700" fill="white">
-        {abbr}
-      </text>
-    </g>
+    <foreignObject x={x} y={y} width={size} height={size} style={{ overflow: 'visible' }}>
+      <div
+        // eslint-disable-next-line react/no-unknown-property
+        xmlns="http://www.w3.org/1999/xhtml"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size, color }}
+      >
+        <SupplyIcon typeId={typeId} size={size} />
+      </div>
+    </foreignObject>
   );
 }
 
 function Room({ roomNum, floor, x, y, isEvent, suppliesHere }) {
-  const hasSupplies = suppliesHere.length > 0;
-  const bg     = isEvent ? C.event   : C.elevated;
+  const bg     = isEvent ? C.event    : C.elevated;
   const border = isEvent ? C.eventBdr : C.border;
+  // Unique types in this room, max 2 visible
+  const types = [...new Set(suppliesHere.map(u => u.typeId))].slice(0, 2);
+  const totalW = types.length * ROOM_ICON + Math.max(0, types.length - 1) * 2;
+  const iconsX = x + (ROOM_W - totalW) / 2;
 
   return (
     <g>
       <rect x={x} y={y} width={ROOM_W} height={ROOM_H} rx={3} fill={bg} stroke={border} strokeWidth={1} />
-      <text x={x + ROOM_W / 2} y={y + 12} textAnchor="middle" fontSize="7" fill={isEvent ? C.goldLt : C.textSub} fontWeight="500">
+      <text x={x + ROOM_W / 2} y={y + 12} textAnchor="middle" fontSize="7"
+        fill={isEvent ? C.goldLt : C.textSub} fontWeight="500">
         {`${floor}${String(roomNum).padStart(2, '0')}`}
       </text>
-      {hasSupplies && (
-        <circle cx={x + ROOM_W - 5} cy={y + 5} r={4} fill={C.accent} />
-      )}
-      <title>{`Room ${floor}${String(roomNum).padStart(2, '0')}${isEvent ? ' (Event Guest)' : ''}${hasSupplies ? ' • Has supplies' : ''}`}</title>
+      {types.map((typeId, i) => (
+        <SvgIcon
+          key={typeId}
+          typeId={typeId}
+          x={iconsX + i * (ROOM_ICON + 2)}
+          y={y + ROOM_H - ROOM_ICON - 4}
+          size={ROOM_ICON}
+          color={C.accentLt}
+        />
+      ))}
+      <title>{`Room ${floor}${String(roomNum).padStart(2, '0')}${isEvent ? ' (Event Guest)' : ''}${types.length ? ' • Has supplies' : ''}`}</title>
     </g>
   );
 }
@@ -77,27 +85,32 @@ function Closet({ x, y, h, units }) {
   const countByType = {};
   units.forEach(u => { countByType[u.typeId] = (countByType[u.typeId] || 0) + 1; });
   const types = Object.entries(countByType);
+  const COL_W = CLOSET_W / 2; // 21px per column
 
   return (
     <g>
       <rect x={x} y={y} width={CLOSET_W} height={h} rx={4} fill={C.surface} stroke={C.accent} strokeWidth={1.5} />
-      <text x={x + CLOSET_W / 2} y={y + 11} textAnchor="middle" fontSize="7" fill={C.accentLt} fontWeight="700" letterSpacing={0.5}>
+      <text x={x + CLOSET_W / 2} y={y + 11} textAnchor="middle" fontSize="7"
+        fill={C.accentLt} fontWeight="700" letterSpacing={0.5}>
         CLOSET
       </text>
       {types.slice(0, 6).map(([typeId, count], i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        // Center each item within its half of the closet width (21px per column)
-        const cx = x + 10.5 + col * 21;
-        const dotY = y + 26 + row * 20;
+        const col  = i % 2;
+        const row  = Math.floor(i / 2);
+        const cx   = x + COL_W * col + COL_W / 2;   // center of column
+        const iconTop = y + 18 + row * 26;
         return (
           <g key={typeId}>
-            <circle cx={cx} cy={dotY} r={5} fill={DOT_COLORS[typeId] || C.textSub} opacity={0.85} />
-            <text x={cx} y={dotY} textAnchor="middle" dominantBaseline="middle" fontSize="5" fontWeight="700" fill="white">
-              {SUPPLY_ABBR[typeId] || '?'}
-            </text>
-            {/* count centered below dot — no horizontal overflow */}
-            <text x={cx} y={dotY + 10} textAnchor="middle" fontSize="7" fontWeight="700" fill={C.text}>
+            <SvgIcon
+              typeId={typeId}
+              x={cx - CLOSET_ICON / 2}
+              y={iconTop}
+              size={CLOSET_ICON}
+              color={C.accent}
+            />
+            {/* count: extra gap below icon for readability */}
+            <text x={cx} y={iconTop + CLOSET_ICON + 7} textAnchor="middle"
+              fontSize="7" fontWeight="700" fill={C.text}>
               {count}
             </text>
           </g>
