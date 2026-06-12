@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Users, User, Wrench, X } from 'lucide-react';
-import { MdVilla } from 'react-icons/md';
+import { MdVilla, MdManageAccounts } from 'react-icons/md';
 import { useStore, selectors } from './store/useStore';
 import SetupView from './views/SetupView';
 import StaffView from './views/StaffView';
@@ -113,9 +113,12 @@ export default function App() {
           style={{ background: '#08090a' }}
         >
           <div className="relative px-4 pt-10 pb-3 flex items-start flex-shrink-0">
-            <div>
-              <h2 className="font-bold text-base leading-tight text-lance-text">Hotel Manager</h2>
-              <p className="text-[11px] text-lance-text-sub">Supply management</p>
+            <div className="flex items-center gap-2.5">
+              <MdManageAccounts size={26} className="text-lance-accent" />
+              <div>
+                <h2 className="font-bold text-base leading-tight text-lance-text">Hotel Manager</h2>
+                <p className="text-[11px] text-lance-text-sub">Supply management</p>
+              </div>
             </div>
             <button
               onClick={() => setShowSetup(false)}
