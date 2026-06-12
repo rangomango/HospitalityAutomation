@@ -1,4 +1,4 @@
-import { ArrowRight, X, Bell } from 'lucide-react';
+import { ArrowRight, X } from 'lucide-react';
 import { MdHotel } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
@@ -67,12 +67,24 @@ function SupplyCard({ type, floor, guestRoom }) {
   );
   const canCancel = myRequest && (myRequest.status === 'pending' || myRequest.status === 'assigned');
 
-  const statusText = myRequest ? {
-    pending:   `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`,
-    assigned:  'On the way',
-    delivered: 'Delivered',
-    returned:  null,
-  }[myRequest.status] : null;
+  const isReminder = myRequest?.status === 'delivered' && myRequest?.reminderSent;
+
+  const displayText = myRequest ? (
+    isReminder
+      ? 'Please place the item outside your door for pickup when done.'
+      : {
+          pending:   `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`,
+          assigned:  'On the way',
+          delivered: 'Delivered',
+          returned:  null,
+        }[myRequest.status]
+  ) : null;
+
+  const textCls = myRequest?.status === 'assigned'
+    ? 'text-lance-accent-lt font-medium'
+    : isReminder
+    ? 'text-lance-gold-lt'
+    : 'text-lance-text-sub';
 
   return (
     <div className="bg-lance-surface rounded-xl p-3 mb-2">
@@ -107,33 +119,24 @@ function SupplyCard({ type, floor, guestRoom }) {
         </div>
       </div>
 
-      {myRequest && statusText && (
-        <div className="mt-1.5">
-          <p className={`text-xs ${myRequest.status === 'assigned' ? 'text-lance-accent-lt font-medium' : 'text-lance-text-sub'}`}>
-            {statusText}
-          </p>
-          {myRequest.status === 'delivered' && myRequest.reminderSent && (
-            <div className="mt-1.5 bg-lance-gold-dim border border-lance-gold/30 rounded-lg p-2 text-xs text-lance-gold-lt">
-              <Bell size={11} className="inline mr-1" />
-              Please place the item outside your door for pickup when done.
-            </div>
-          )}
-        </div>
+      {myRequest && displayText && (
+        <p className={`text-xs mt-1.5 ${textCls}`}>{displayText}</p>
       )}
     </div>
   );
 }
 
-function DevPanel({ guestRoom, setGuestRoom }) {
+function DevPanel({ guestRoom }) {
   const requests = useStore(s => s.requests);
   const triggerReminder = useStore(s => s.triggerReturnReminder);
+  const resetGuestRoom = useStore(s => s.resetGuestRoom);
   const delivered = requests.filter(r => r.guestRoom === guestRoom && r.status === 'delivered' && !r.reminderSent);
 
   return (
     <div className="mt-4 rounded-xl p-3" style={{ background: 'rgba(0,0,0,0.35)' }}>
       <p className="text-[10px] font-semibold text-lance-text-sub uppercase tracking-widest mb-2">Dev</p>
       <button
-        onClick={() => setGuestRoom(null)}
+        onClick={() => resetGuestRoom(guestRoom)}
         className="w-full text-left text-xs text-lance-text-sub px-3 py-2 rounded-lg transition-colors mb-1"
         style={{ background: 'rgba(255,255,255,0.04)' }}
       >
@@ -201,7 +204,7 @@ export default function GuestView() {
           </>
         )}
 
-        <DevPanel guestRoom={guestRoom} setGuestRoom={setGuestRoom} />
+        <DevPanel guestRoom={guestRoom} />
       </div>
     </div>
   );

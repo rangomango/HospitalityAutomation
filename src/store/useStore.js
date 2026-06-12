@@ -344,6 +344,24 @@ export const useStore = create(
 
       // ─── UI State ─────────────────────────────────────────────────────────
       setGuestRoom: (room) => set({ guestRoom: room }),
+
+      resetGuestRoom(roomId) {
+        const { requests, tasks } = get();
+        const roomRequests = requests.filter(r => r.guestRoom === roomId);
+        const roomRequestIds = new Set(roomRequests.map(r => r.id));
+        const roomTasks = tasks.filter(t => roomRequestIds.has(t.requestId));
+        const affectedUnitIds = new Set(roomTasks.flatMap(t => t.supplyUnitIds || []));
+
+        set(s => ({
+          requests: s.requests.filter(r => r.guestRoom !== roomId),
+          tasks: s.tasks.filter(t => !roomRequestIds.has(t.requestId)),
+          supplyUnits: s.supplyUnits.map(u =>
+            affectedUnitIds.has(u.id)
+              ? { ...u, status: 'available', location: 'closet' }
+              : u
+          ),
+        }));
+      },
       setMapFloor: (floor) => set({ currentMapFloor: floor }),
 
       clearTasks: () => set({ tasks: [] }),
