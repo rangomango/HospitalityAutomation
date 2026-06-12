@@ -114,8 +114,8 @@ function SupplyCard({ type, floor, guestRoom }) {
       </div>
 
       {statusEntry && (
-        <div className={`flex items-center gap-1.5 text-xs mt-1.5 ${statusEntry.cls}`}>
-          {statusEntry.icon}
+        <div className={`flex items-center gap-3 text-xs mt-1.5 ${statusEntry.cls}`}>
+          <span className="w-6 flex justify-center flex-shrink-0">{statusEntry.icon}</span>
           <span>{statusEntry.text}</span>
         </div>
       )}
