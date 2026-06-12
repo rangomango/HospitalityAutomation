@@ -20,6 +20,7 @@ const NOTIF_ICONS = {
 function TaskCard({ task }) {
   const acceptTask = useStore(s => s.acceptTask);
   const completeTask = useStore(s => s.completeTask);
+  const removeTask = useStore(s => s.removeTask);
 
   const fromLabel = task.fromLocation === 'closet'
     ? `Floor ${task.fromFloor} Closet`
@@ -38,10 +39,13 @@ function TaskCard({ task }) {
     pending:   { background: 'rgba(245,158,11,0.28)',  color: '#fcd34d' },
     accepted:  { background: 'rgba(43,202,149,0.28)',  color: '#5eead4' },
     completed: { background: 'rgba(52,211,153,0.22)',  color: '#6ee7b7' },
+    cancelled: { background: 'rgba(239,68,68,0.2)',    color: '#fca5a5' },
   }[task.status] || {};
 
+  const isCancelled = task.status === 'cancelled';
+
   return (
-    <div className="rounded-xl p-3 mb-2 bg-lance-surface">
+    <div className={`rounded-xl p-3 mb-2 bg-lance-surface ${isCancelled ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-2 mb-1.5">
         {TYPE_ICON[task.type]}
         <p className="text-[10px] font-bold uppercase tracking-wide text-lance-text-sub">{typeLabel}</p>
@@ -94,6 +98,15 @@ function TaskCard({ task }) {
             }}
           >
             <CheckCircle size={13} /> Mark Delivered
+          </button>
+        )}
+        {isCancelled && (
+          <button
+            onClick={() => removeTask(task.id)}
+            className="flex-1 py-2 text-xs font-bold rounded-lg transition-all"
+            style={{ color: '#4a7068', background: 'rgba(0,0,0,0.2)' }}
+          >
+            Clear
           </button>
         )}
       </div>

@@ -233,10 +233,14 @@ export const useStore = create(
         }
 
         set(s => ({
-          tasks: s.tasks.filter(t => t.id !== req.taskId),
+          tasks: s.tasks.map(t =>
+            t.id === req.taskId ? { ...t, status: 'cancelled' } : t
+          ),
           requests: s.requests.filter(r => r.id !== requestId),
         }));
       },
+
+      removeTask: (taskId) => set(s => ({ tasks: s.tasks.filter(t => t.id !== taskId) })),
 
       triggerReturnReminder(requestId) {
         const req = get().requests.find(r => r.id === requestId);

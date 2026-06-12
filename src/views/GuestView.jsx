@@ -1,5 +1,5 @@
 import { ArrowRight, X } from 'lucide-react';
-import { MdHotel } from 'react-icons/md';
+import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
 import { SupplyIcon } from '../components/SupplyIcon';
@@ -69,22 +69,16 @@ function SupplyCard({ type, floor, guestRoom }) {
 
   const isReminder = myRequest?.status === 'delivered' && myRequest?.reminderSent;
 
-  const displayText = myRequest ? (
-    isReminder
-      ? 'Please place the item outside your door for pickup when done.'
-      : {
-          pending:   `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`,
-          assigned:  'On the way',
-          delivered: 'Delivered',
-          returned:  null,
-        }[myRequest.status]
-  ) : null;
+  const statusMap = myRequest ? {
+    pending:   { text: `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`, icon: <MdAccessTime size={13} />, cls: 'text-lance-text-sub' },
+    assigned:  { text: 'On the way',  icon: <MdLocalShipping size={13} />, cls: 'text-lance-accent-lt font-medium' },
+    delivered: { text: 'Delivered',   icon: <MdCheckCircle size={13} />,   cls: 'text-lance-text-sub' },
+    returned:  null,
+  }[myRequest.status] : null;
 
-  const textCls = myRequest?.status === 'assigned'
-    ? 'text-lance-accent-lt font-medium'
-    : isReminder
-    ? 'text-lance-gold-lt'
-    : 'text-lance-text-sub';
+  const statusEntry = isReminder
+    ? { text: 'Please place the item outside your door for pickup when done.', icon: <MdNotificationsActive size={13} />, cls: 'text-lance-gold-lt' }
+    : statusMap;
 
   return (
     <div className="bg-lance-surface rounded-xl p-3 mb-2">
@@ -119,8 +113,11 @@ function SupplyCard({ type, floor, guestRoom }) {
         </div>
       </div>
 
-      {myRequest && displayText && (
-        <p className={`text-xs mt-1.5 ${textCls}`}>{displayText}</p>
+      {statusEntry && (
+        <div className={`flex items-center gap-1.5 text-xs mt-1.5 ${statusEntry.cls}`}>
+          {statusEntry.icon}
+          <span>{statusEntry.text}</span>
+        </div>
       )}
     </div>
   );
