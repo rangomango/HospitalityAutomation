@@ -43,8 +43,15 @@ export default function App() {
         {activeTab === 'guest' && <GuestView />}
       </main>
 
-      {/* Footer navigation */}
-      <nav className="bg-lance-surface border-t border-lance-border flex-shrink-0 safe-bottom">
+      {/* Footer navigation — subtle 3D lift via gradient + shadow */}
+      <nav
+        className="flex-shrink-0 safe-bottom"
+        style={{
+          background: 'linear-gradient(to bottom, #162a28 0%, #0e1c1f 100%)',
+          borderTop: '1px solid rgba(255,255,255,0.055)',
+          boxShadow: '0 -6px 24px rgba(0,0,0,0.55), 0 -1px 0 rgba(43,202,149,0.07)',
+        }}
+      >
         <div className="flex">
           {TABS.map(({ id, label, Icon }) => {
             const active = activeTab === id;
@@ -52,11 +59,25 @@ export default function App() {
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 relative transition-colors ${
+                className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 relative transition-all ${
                   active ? 'text-lance-accent' : 'text-lance-text-sub'
                 }`}
               >
-                <span className="relative">
+                {/* Active tab pill background */}
+                {active && (
+                  <span
+                    className="absolute inset-x-3 top-0.5 bottom-1 rounded-xl pointer-events-none"
+                    style={{ background: 'rgba(43,202,149,0.07)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }}
+                  />
+                )}
+                {/* Top glow line */}
+                {active && (
+                  <span
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-px rounded-full"
+                    style={{ background: 'linear-gradient(to right, transparent, #2BCA95, transparent)' }}
+                  />
+                )}
+                <span className="relative z-10">
                   <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
                   {id === 'staff' && unread > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
@@ -64,22 +85,25 @@ export default function App() {
                     </span>
                   )}
                 </span>
-                <span className={`text-[10px] font-semibold ${active ? 'text-lance-accent' : 'text-lance-text-sub'}`}>
+                <span className={`text-[10px] font-semibold relative z-10 ${active ? 'text-lance-accent' : 'text-lance-text-sub'}`}>
                   {label}
                 </span>
-                {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-lance-accent rounded-full" />
-                )}
               </button>
             );
           })}
         </div>
       </nav>
 
-      {/* Setup overlay */}
+      {/* Setup overlay — inline background guarantees full opacity over any content */}
       {showSetup && (
-        <div className="absolute inset-0 z-50 flex flex-col bg-lance-bg">
-          <div className="bg-lance-surface border-b border-lance-border px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0">
+        <div
+          className="absolute inset-0 z-50 flex flex-col overflow-hidden"
+          style={{ background: '#08090a' }}
+        >
+          <div
+            className="px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0"
+            style={{ background: '#0e1c1f', borderBottom: '1px solid #1d3535' }}
+          >
             <div className="flex items-center gap-2">
               <Wrench size={16} className="text-lance-accent" />
               <h2 className="font-bold text-base text-lance-text">Hotel Setup</h2>
@@ -92,7 +116,7 @@ export default function App() {
               <X size={18} />
             </button>
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden" style={{ background: '#08090a' }}>
             <SetupView />
           </div>
         </div>
