@@ -128,28 +128,30 @@ function SupplyCard({ type, floor, guestRoom }) {
   );
 }
 
-function DevPanel({ guestRoom }) {
+function DevPanel({ guestRoom, onOpenSetup }) {
   const requests = useStore(s => s.requests);
   const triggerReminder = useStore(s => s.triggerReturnReminder);
   const resetGuestRoom = useStore(s => s.resetGuestRoom);
   const delivered = requests.filter(r => r.guestRoom === guestRoom && r.status === 'delivered' && !r.reminderSent);
 
+  const btnCls = 'w-full text-left text-xs text-lance-text-sub px-3 py-2 rounded-lg transition-colors';
+  const btnStyle = { background: 'rgba(255,255,255,0.04)' };
+
   return (
     <div className="mt-4 rounded-xl p-3" style={{ background: 'rgba(0,0,0,0.35)' }}>
       <p className="text-[10px] font-semibold text-lance-text-sub uppercase tracking-widest mb-2">Dev</p>
-      <button
-        onClick={() => resetGuestRoom(guestRoom)}
-        className="w-full text-left text-xs text-lance-text-sub px-3 py-2 rounded-lg transition-colors mb-1"
-        style={{ background: 'rgba(255,255,255,0.04)' }}
-      >
+      <button onClick={() => resetGuestRoom(guestRoom)} className={`${btnCls} mb-1`} style={btnStyle}>
         Reset room
+      </button>
+      <button onClick={onOpenSetup} className={`${btnCls} mb-1`} style={btnStyle}>
+        View setup
       </button>
       {delivered.map(r => (
         <button
           key={r.id}
           onClick={() => triggerReminder(r.id)}
-          className="w-full text-left text-xs text-lance-text-sub px-3 py-2 rounded-lg transition-colors mt-1"
-          style={{ background: 'rgba(255,255,255,0.04)' }}
+          className={`${btnCls} mt-1`}
+          style={btnStyle}
         >
           Trigger 24h reminder: {SUPPLY_TYPE_MAP[r.typeId]?.name}
         </button>
@@ -158,7 +160,7 @@ function DevPanel({ guestRoom }) {
   );
 }
 
-export default function GuestView() {
+export default function GuestView({ onOpenSetup }) {
   const guestRoom = useStore(s => s.guestRoom);
   const setGuestRoom = useStore(s => s.setGuestRoom);
   const events = useStore(s => s.events);
@@ -194,7 +196,7 @@ export default function GuestView() {
             <div className="relative z-10 flex justify-center px-4 py-2.5">
               <span
                 className="text-sm font-semibold px-4 py-1 rounded-lg"
-                style={{ color: '#23a87c', background: 'rgba(255,255,255,0.07)' }}
+                style={{ color: '#23a87c', background: 'rgba(255,255,255,0.13)' }}
               >
                 Welcome {matchingEvent.name} party
               </span>
@@ -235,7 +237,7 @@ export default function GuestView() {
           </>
         )}
 
-        <DevPanel guestRoom={guestRoom} />
+        <DevPanel guestRoom={guestRoom} onOpenSetup={onOpenSetup} />
       </div>
     </div>
   );

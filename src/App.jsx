@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Users, User, Wrench, X } from 'lucide-react';
-import { MdHotel } from 'react-icons/md';
+import { Users, User, X } from 'lucide-react';
+import { MdVilla } from 'react-icons/md';
 import { useStore, selectors } from './store/useStore';
 import SetupView from './views/SetupView';
 import StaffView from './views/StaffView';
@@ -22,26 +22,28 @@ export default function App() {
       <header className="bg-lance-surface px-4 pt-10 pb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <MdHotel size={26} className="text-lance-accent" />
+            <MdVilla size={26} className="text-lance-accent" />
             <div>
-              <h1 className="font-bold text-base leading-tight text-lance-text">Hotel Readiness</h1>
+              <h1 className="font-bold text-base leading-tight text-lance-text">Claremont Resort & Club</h1>
               <p className="text-lance-text-sub text-xs">Supply Management</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowSetup(true)}
-            className="p-2 text-lance-text-sub hover:text-lance-accent transition-colors"
-            aria-label="Open setup"
-          >
-            <Wrench size={18} />
-          </button>
+          {showSetup && (
+            <button
+              onClick={() => setShowSetup(false)}
+              className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
+              aria-label="Close setup"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
       </header>
 
       {/* Main content */}
       <main className="flex-1 overflow-hidden">
         {activeTab === 'staff' && <StaffView />}
-        {activeTab === 'guest' && <GuestView />}
+        {activeTab === 'guest' && <GuestView onOpenSetup={() => setShowSetup(true)} />}
       </main>
 
       {/* Footer navigation */}
@@ -97,18 +99,8 @@ export default function App() {
           className="absolute inset-0 z-50 flex flex-col overflow-hidden"
           style={{ background: '#08090a' }}
         >
-          <div className="px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <Wrench size={16} className="text-lance-accent" />
-              <h2 className="font-bold text-base text-lance-text">Hotel Manager</h2>
-            </div>
-            <button
-              onClick={() => setShowSetup(false)}
-              className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
-              aria-label="Close setup"
-            >
-              <X size={18} />
-            </button>
+          <div className="px-4 pt-10 pb-3 flex items-center flex-shrink-0">
+            <h2 className="font-bold text-base text-lance-text">Hotel Manager</h2>
           </div>
           <div className="flex-1 overflow-hidden" style={{ background: '#08090a' }}>
             <SetupView />
