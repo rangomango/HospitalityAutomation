@@ -128,7 +128,7 @@ export const useStore = create(
 
           get()._createTask({
             type: 'forward_deploy',
-            label: `Move ${freshUnits.length} ${SUPPLY_TYPE_MAP[plan.typeId]?.name}${freshUnits.length !== 1 ? 's' : ''} to Floor ${plan.toFloor} in preparation for ${plan.eventName}`,
+            label: `Move ${freshUnits.length} ${plan.typeName}${freshUnits.length !== 1 ? 's' : ''} to Floor ${plan.toFloor} in preparation for ${plan.eventName}`,
             supplyUnitIds: freshUnits.map(u => u.id),
             fromFloor: freshUnits[0].floor,
             fromLocation: 'closet',
@@ -310,6 +310,7 @@ export const useStore = create(
       setGuestRoom: (room) => set({ guestRoom: room }),
       setMapFloor: (floor) => set({ currentMapFloor: floor }),
 
+      clearTasks: () => set({ tasks: [] }),
       resetAll: () => set(initialState),
     }),
     { name: 'hotel-supply-v1' }

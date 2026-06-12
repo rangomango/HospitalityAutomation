@@ -141,6 +141,7 @@ export default function StaffView() {
   const notifications = useStore(s => s.notifications);
   const markAllRead = useStore(s => s.markAllRead);
   const clearAllNotifications = useStore(s => s.clearAllNotifications);
+  const clearTasks = useStore(s => s.clearTasks);
   const unread = useStore(selectors.unreadCount);
 
   const activeTasks = tasks.filter(t => t.status !== 'completed').sort((a, b) => a.createdAt - b.createdAt);
@@ -176,6 +177,14 @@ export default function StaffView() {
       <div className="flex-1 overflow-y-auto scrollable px-4 py-3">
         {tab === 'tasks' && (
           <>
+            {tasks.length > 0 && (
+              <button
+                onClick={clearTasks}
+                className="w-full text-xs text-red-400 font-semibold mb-3 text-right"
+              >
+                Clear all tasks
+              </button>
+            )}
             {activeTasks.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 text-lance-text-sub">
                 <CheckCircle size={40} className="mb-3 opacity-20" />
