@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CalendarDays, Package, Map, Truck, PlusCircle, Trash2, Zap } from 'lucide-react';
+import { CalendarDays, Package, Map, Truck, PlusCircle, Trash2, Zap, Pencil, X } from 'lucide-react';
 import { MdCelebration, MdCalendarMonth, MdLocalShipping } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import EventForm from '../components/EventForm';
@@ -19,6 +19,7 @@ function EventCard({ event }) {
   const removeEvent = useStore(s => s.removeEvent);
   const triggerEventDeploy = useStore(s => s.triggerEventDeploy);
   const [triggerState, setTriggerState] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [h, m] = event.startTime.split(':').map(Number);
   const deployH = h - event.bufferHours;
@@ -31,6 +32,20 @@ function EventCard({ event }) {
     setTriggerState(count > 0 ? 'ok' : 'empty');
     setTimeout(() => setTriggerState(null), 3000);
   };
+
+  if (isEditing) {
+    return (
+      <div className="bg-lance-elevated rounded-xl p-4 mb-2">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-bold text-lance-text">Edit Event</p>
+          <button onClick={() => setIsEditing(false)} className="p-1 text-lance-text-sub hover:text-lance-text transition-colors">
+            <X size={15} />
+          </button>
+        </div>
+        <EventForm initialData={event} onSave={() => setIsEditing(false)} onClose={() => setIsEditing(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-lance-surface rounded-xl p-3 mb-2">
@@ -51,12 +66,20 @@ function EventCard({ event }) {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => removeEvent(event.id)}
-          className="p-1.5 text-lance-text-sub hover:text-red-400 transition-colors flex-shrink-0"
-        >
-          <Trash2 size={15} />
-        </button>
+        <div className="flex gap-1 flex-shrink-0">
+          <button
+            onClick={() => setIsEditing(true)}
+            className="p-1.5 text-lance-text-sub hover:text-lance-accent transition-colors"
+          >
+            <Pencil size={14} />
+          </button>
+          <button
+            onClick={() => removeEvent(event.id)}
+            className="p-1.5 text-lance-text-sub hover:text-red-400 transition-colors"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       <div className="mt-2.5 flex items-center gap-2">

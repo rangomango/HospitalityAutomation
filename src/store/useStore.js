@@ -310,6 +310,7 @@ export const useStore = create(
       setMapFloor: (floor) => set({ currentMapFloor: floor }),
 
       clearTasks: () => set({ tasks: [] }),
+      clearCompletedTasks: () => set(s => ({ tasks: s.tasks.filter(t => t.status !== 'completed') })),
       clearInventory: () => set({ supplyUnits: [] }),
       resetAll: () => set(initialState),
     }),

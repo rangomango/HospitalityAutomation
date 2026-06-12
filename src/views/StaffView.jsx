@@ -142,6 +142,7 @@ export default function StaffView() {
   const markAllRead = useStore(s => s.markAllRead);
   const clearAllNotifications = useStore(s => s.clearAllNotifications);
   const clearTasks = useStore(s => s.clearTasks);
+  const clearCompletedTasks = useStore(s => s.clearCompletedTasks);
   const unread = useStore(selectors.unreadCount);
 
   const activeTasks = tasks.filter(t => t.status !== 'completed').sort((a, b) => a.createdAt - b.createdAt);
@@ -160,7 +161,7 @@ export default function StaffView() {
           },
           {
             id: 'done',
-            label: 'Done',
+            label: 'Completed',
             badge: completedTasks.length,
             badgeStyle: { background: 'rgba(52,211,153,0.2)', color: '#6ee7b7' },
           },
@@ -220,6 +221,14 @@ export default function StaffView() {
 
         {tab === 'done' && (
           <>
+            {completedTasks.length > 0 && (
+              <button
+                onClick={clearCompletedTasks}
+                className="w-full text-xs text-red-400 font-semibold mb-3 text-right"
+              >
+                Clear all
+              </button>
+            )}
             {completedTasks.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 text-lance-text-sub">
                 <Clock size={40} className="mb-3 opacity-20" />

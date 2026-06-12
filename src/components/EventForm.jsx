@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Save } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { EVENT_TYPES, FLOORS } from '../data/constants';
 
@@ -10,13 +10,32 @@ const empty = {
   bufferHours: 3, floorStart: 1, floorEnd: 1, roomStart: 1, roomEnd: 10,
 };
 
-// No border — just elevated bg with a subtle focus glow
 const inputCls = 'w-full bg-lance-elevated rounded-lg px-3 py-2 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none focus:ring-1 focus:ring-lance-accent transition-colors';
 const selectCls = inputCls;
 
-export default function EventForm({ onClose }) {
-  const addEvent = useStore(s => s.addEvent);
-  const [form, setForm] = useState(empty);
+function deriveFormFromEvent(event) {
+  const rooms = event.rooms || [];
+  const floors = rooms.map(r => Math.floor(r / 100));
+  const roomNums = rooms.map(r => r % 100);
+  return {
+    name:        event.name,
+    type:        event.type,
+    date:        event.date,
+    startTime:   event.startTime,
+    bufferHours: event.bufferHours,
+    floorStart:  floors.length ? Math.min(...floors) : 1,
+    floorEnd:    floors.length ? Math.max(...floors) : 1,
+    roomStart:   roomNums.length ? Math.min(...roomNums) : 1,
+    roomEnd:     roomNums.length ? Math.max(...roomNums) : 10,
+  };
+}
+
+export default function EventForm({ onClose, initialData, onSave }) {
+  const addEvent    = useStore(s => s.addEvent);
+  const updateEvent = useStore(s => s.updateEvent);
+  const isEditing   = !!initialData;
+
+  const [form, setForm] = useState(isEditing ? deriveFormFromEvent(initialData) : empty);
   const [error, setError] = useState('');
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -36,8 +55,14 @@ export default function EventForm({ onClose }) {
     if (!form.name.trim()) { setError('Event name is required'); return; }
     const rooms = buildRooms();
     if (!rooms.length) { setError('No rooms selected'); return; }
-    addEvent({ ...form, rooms, bufferHours: Number(form.bufferHours) });
-    onClose?.();
+    const data = { ...form, rooms, bufferHours: Number(form.bufferHours) };
+    if (isEditing) {
+      updateEvent(initialData.id, data);
+      onSave?.();
+    } else {
+      addEvent(data);
+      onClose?.();
+    }
   };
 
   const previewRooms = buildRooms();
@@ -131,7 +156,10 @@ export default function EventForm({ onClose }) {
             boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
           }}
         >
-          <PlusCircle size={15} /> Add Event
+          {isEditing
+            ? <><Save size={14} /> Save Changes</>
+            : <><PlusCircle size={15} /> Add Event</>
+          }
         </button>
       </div>
     </form>
