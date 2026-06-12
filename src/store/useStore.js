@@ -68,7 +68,6 @@ export const useStore = create(
       _createTask(task) {
         const t = { ...task, id: uid(), status: 'pending', createdAt: Date.now() };
         set(s => ({ tasks: [...s.tasks, t] }));
-        get()._notify({ type: 'task', message: task.label });
         return t.id;
       },
       acceptTask(taskId) {
@@ -115,7 +114,7 @@ export const useStore = create(
             if (plan.shortage > 0) {
               get()._notify({
                 type: 'conflict',
-                message: `⚠️ Cannot deploy: no ${plan.typeName}(s) available for Floor ${plan.toFloor} (${plan.eventName}). Source ${plan.shortage} more.`,
+                message: `Not enough ${plan.typeName}s for Floor ${plan.toFloor} (${plan.eventName}) — none available to move. Source ${plan.shortage} more.`,
               });
             }
             return;
@@ -146,7 +145,7 @@ export const useStore = create(
           if (plan.shortage > 0) {
             get()._notify({
               type: 'conflict',
-              message: `⚠️ Partial deploy: Moving ${freshUnits.length}/${plan.toSend} ${plan.typeName}(s) to Floor ${plan.toFloor}. Still need ${plan.shortage} more for "${plan.eventName}".`,
+              message: `Partial stock: Moving ${freshUnits.length} of ${plan.toSend} ${plan.typeName}s to Floor ${plan.toFloor}. Still need ${plan.shortage} more for ${plan.eventName}.`,
             });
           }
         });
@@ -160,12 +159,12 @@ export const useStore = create(
         const actionable = plan.filter(p => p.canFulfill > 0);
 
         if (!actionable.length) {
-          get()._notify({
-            type: plan.length ? 'conflict' : 'task',
-            message: plan.length
-              ? `Cannot deploy for this event: no available inventory to move. Add supplies on a different floor first.`
-              : `All floors are already stocked for this event — no deployment needed.`,
-          });
+          if (plan.length) {
+            get()._notify({
+              type: 'conflict',
+              message: `No inventory available to move for this event. Add supplies to a storage floor first.`,
+            });
+          }
           return 0;
         }
 
@@ -247,7 +246,7 @@ export const useStore = create(
           if (totalNeeded > totalHave) {
             get()._notify({
               type: 'conflict',
-              message: `⚠️ Supply shortage: Need ${totalNeeded} ${type.name}(s) across all events (1 per 3 rooms) but only have ${totalHave}. Source ${totalNeeded - totalHave} more.`,
+              message: `Shortage: ${totalNeeded} ${type.name}s needed across all events but only ${totalHave} in stock. Source ${totalNeeded - totalHave} more.`,
             });
           }
         });
@@ -320,7 +319,7 @@ export const useStore = create(
 
 // Derived selectors
 export const selectors = {
-  unreadCount: (s) => s.notifications.filter(n => !n.read).length,
+  unreadCount: (s) => s.notifications.filter(n => !n.read && n.type === 'conflict').length,
   pendingTasks: (s) => s.tasks.filter(t => t.status === 'pending' || t.status === 'accepted'),
   activeTasks: (s) => s.tasks.filter(t => t.status !== 'completed'),
   unitsByFloor: (s, floor) => s.supplyUnits.filter(u => u.floor === floor),

@@ -232,25 +232,32 @@ export default function StaffView() {
 
         {tab === 'notifs' && (
           <>
-            {notifications.length > 0 && (
-              <div className="flex items-center justify-between mb-3">
-                {unread > 0 ? (
-                  <button onClick={markAllRead} className="text-xs text-lance-accent font-semibold">
-                    Mark all read
-                  </button>
-                ) : <span />}
-                <button onClick={clearAllNotifications} className="text-xs text-red-400 font-semibold">
-                  Clear all
-                </button>
-              </div>
-            )}
-            {notifications.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12 text-lance-text-sub">
-                <BellOff size={40} className="mb-3 opacity-20" />
-                <p className="text-sm">No notifications</p>
-              </div>
-            )}
-            {notifications.map(n => <NotificationItem key={n.id} notif={n} />)}
+            {(() => {
+              const conflicts = notifications.filter(n => n.type === 'conflict');
+              return (
+                <>
+                  {conflicts.length > 0 && (
+                    <div className="flex items-center justify-between mb-3">
+                      {unread > 0 ? (
+                        <button onClick={markAllRead} className="text-xs text-lance-accent font-semibold">
+                          Mark all read
+                        </button>
+                      ) : <span />}
+                      <button onClick={clearAllNotifications} className="text-xs text-red-400 font-semibold">
+                        Clear all
+                      </button>
+                    </div>
+                  )}
+                  {conflicts.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-12 text-lance-text-sub">
+                      <BellOff size={40} className="mb-3 opacity-20" />
+                      <p className="text-sm">No shortage alerts</p>
+                    </div>
+                  )}
+                  {conflicts.map(n => <NotificationItem key={n.id} notif={n} />)}
+                </>
+              );
+            })()}
           </>
         )}
       </div>
