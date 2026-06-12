@@ -71,8 +71,12 @@ export const useStore = create(
         return t.id;
       },
       acceptTask(taskId) {
+        const task = get().tasks.find(t => t.id === taskId);
         set(s => ({
           tasks: s.tasks.map(t => t.id === taskId ? { ...t, status: 'accepted' } : t),
+          requests: task?.type === 'deliver' && task?.requestId
+            ? s.requests.map(r => r.id === task.requestId ? { ...r, status: 'assigned' } : r)
+            : s.requests,
         }));
       },
       completeTask(taskId) {
@@ -196,8 +200,8 @@ export const useStore = create(
         const taskId = get()._createTask({
           type: 'deliver',
           label: unit
-            ? `Deliver ${typeName} → Room ${guestRoom}`
-            : `Source and deliver ${typeName} → Room ${guestRoom}`,
+            ? `Room ${guestRoom} has requested a ${typeName}`
+            : `Room ${guestRoom} has requested a ${typeName} — item needs to be sourced`,
           supplyUnitIds: unit ? [unit.id] : [],
           fromFloor: unit ? unit.floor : floor,
           fromLocation: 'closet',
