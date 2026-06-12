@@ -35,8 +35,8 @@ function RoomEntry() {
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
         <input
           type="number"
-          placeholder="Room number (e.g. 301)"
-          className="w-full bg-lance-elevated rounded-xl px-4 py-3 text-center text-lg font-bold text-lance-text placeholder-lance-text-sub focus:outline-none focus:ring-1 focus:ring-lance-accent mb-3 transition-colors"
+          placeholder="e.g. 301"
+          className="w-full bg-transparent border border-lance-border rounded-xl px-4 py-3 text-center text-lg font-semibold text-lance-text placeholder-lance-text-sub focus:outline-none focus:border-lance-accent mb-3 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           value={input}
           onChange={e => { setInput(e.target.value); setError(''); }}
         />
@@ -124,24 +124,29 @@ function SupplyCard({ type, floor, guestRoom }) {
   );
 }
 
-function ReminderTrigger({ guestRoom }) {
+function DevPanel({ guestRoom, setGuestRoom }) {
   const requests = useStore(s => s.requests);
   const triggerReminder = useStore(s => s.triggerReturnReminder);
   const delivered = requests.filter(r => r.guestRoom === guestRoom && r.status === 'delivered' && !r.reminderSent);
-  if (!delivered.length) return null;
 
   return (
-    <div className="bg-lance-gold-dim border border-lance-gold/30 rounded-xl p-3 mb-3">
-      <p className="text-xs font-semibold text-lance-gold-lt mb-2 flex items-center gap-1">
-        <Bell size={12} /> Dev: Trigger 24h Return Reminder
-      </p>
+    <div className="mt-4 rounded-xl p-3" style={{ background: 'rgba(0,0,0,0.35)' }}>
+      <p className="text-[10px] font-semibold text-lance-text-sub uppercase tracking-widest mb-2">Dev</p>
+      <button
+        onClick={() => setGuestRoom(null)}
+        className="w-full text-left text-xs text-lance-text-sub px-3 py-2 rounded-lg transition-colors mb-1"
+        style={{ background: 'rgba(255,255,255,0.04)' }}
+      >
+        Reset room
+      </button>
       {delivered.map(r => (
         <button
           key={r.id}
           onClick={() => triggerReminder(r.id)}
-          className="w-full text-left text-xs bg-lance-gold/10 hover:bg-lance-gold/20 text-lance-gold-lt px-3 py-2 rounded-lg mb-1 last:mb-0 transition-colors"
+          className="w-full text-left text-xs text-lance-text-sub px-3 py-2 rounded-lg transition-colors mt-1"
+          style={{ background: 'rgba(255,255,255,0.04)' }}
         >
-          Send reminder for: {SUPPLY_TYPE_MAP[r.typeId]?.name}
+          Trigger 24h reminder: {SUPPLY_TYPE_MAP[r.typeId]?.name}
         </button>
       ))}
     </div>
@@ -177,9 +182,7 @@ export default function GuestView() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollable px-4 pb-3">
-        <ReminderTrigger guestRoom={guestRoom} />
-
+      <div className="flex-1 overflow-y-auto scrollable px-4 pb-4">
         {garmentCare.length > 0 && (
           <>
             <p className="text-[11px] font-bold text-lance-accent uppercase tracking-wide mb-1.5 mt-1">Garment Care</p>
@@ -197,6 +200,8 @@ export default function GuestView() {
             ))}
           </>
         )}
+
+        <DevPanel guestRoom={guestRoom} setGuestRoom={setGuestRoom} />
       </div>
     </div>
   );
