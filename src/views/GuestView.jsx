@@ -67,12 +67,12 @@ function SupplyCard({ type, floor, guestRoom }) {
   );
   const canCancel = myRequest && (myRequest.status === 'pending' || myRequest.status === 'assigned');
 
-  const statusText = {
-    pending:   `Requested ${formatDistanceToNow(myRequest?.requestedAt, { addSuffix: true })}`,
+  const statusText = myRequest ? {
+    pending:   `Requested ${formatDistanceToNow(myRequest.requestedAt, { addSuffix: true })}`,
     assigned:  'On the way',
     delivered: 'Delivered',
     returned:  null,
-  }[myRequest?.status];
+  }[myRequest.status] : null;
 
   return (
     <div className="bg-lance-surface rounded-xl p-3 mb-2">
