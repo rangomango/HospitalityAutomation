@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, CheckCircle, Clock, Truck, Package, AlertTriangle, ChevronRight, BellOff } from 'lucide-react';
+import { Bell, CheckCircle, Clock, Truck, Package, AlertTriangle, ChevronRight, BellOff, Timer } from 'lucide-react';
 import { useStore, selectors } from '../store/useStore';
 import { SUPPLY_TYPE_MAP } from '../data/constants';
 import { formatDistanceToNow } from 'date-fns';
@@ -29,16 +29,17 @@ function TaskCard({ task }) {
     : `Room ${task.toLocation} (Floor ${task.toFloor})`;
 
   const typeLabel = {
-    forward_deploy: 'Forward Deploy',
-    deliver: 'Guest Delivery',
-    retrieve: 'Item Retrieval',
+    forward_deploy: 'Pre-stage',
+    deliver:        'Guest Delivery',
+    retrieve:       'Item Retrieval',
   }[task.type] || task.type;
 
-  const statusStyle = {
-    pending:   'border-lance-gold/40 bg-lance-gold-dim',
-    accepted:  'border-lance-accent/40 bg-lance-accent-dim',
-    completed: 'border-emerald-800 bg-emerald-950/40',
-  }[task.status] || 'border-lance-border bg-lance-surface';
+  // Status tints — no border, background conveys state
+  const statusBg = {
+    pending:   'rgba(201,144,47,0.08)',
+    accepted:  'rgba(43,202,149,0.08)',
+    completed: 'rgba(16,185,129,0.05)',
+  }[task.status] || 'transparent';
 
   const statusBadge = {
     pending:   'bg-lance-gold-dim text-lance-gold-lt',
@@ -47,7 +48,7 @@ function TaskCard({ task }) {
   }[task.status] || '';
 
   return (
-    <div className={`rounded-xl border p-3 mb-2 ${statusStyle}`}>
+    <div className="rounded-xl p-3 mb-2" style={{ background: statusBg }}>
       <div className="flex items-center gap-2 mb-1.5">
         {TYPE_ICON[task.type]}
         <p className="text-[10px] font-bold uppercase tracking-wide text-lance-text-sub">{typeLabel}</p>
@@ -63,8 +64,9 @@ function TaskCard({ task }) {
         <span className="font-medium text-lance-text-md">{toLabel}</span>
       </div>
       {task.deadline && (
-        <p className="text-[10px] text-lance-gold-lt mb-1.5">
-          ⏰ Due by {new Date(task.deadline).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}
+        <p className="text-[10px] text-lance-gold-lt mb-1.5 flex items-center gap-1">
+          <Timer size={10} />
+          Due by {new Date(task.deadline).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}
         </p>
       )}
       <p className="text-[10px] text-lance-text-sub mb-2">
@@ -75,7 +77,12 @@ function TaskCard({ task }) {
         {task.status === 'pending' && (
           <button
             onClick={() => acceptTask(task.id)}
-            className="flex-1 py-2 bg-lance-accent text-lance-bg text-xs font-bold rounded-lg hover:bg-lance-accent-hov transition-colors"
+            className="flex-1 py-2 text-xs font-bold rounded-lg transition-all"
+            style={{
+              color: '#2BCA95',
+              background: 'rgba(43,202,149,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
+            }}
           >
             Accept Task
           </button>
@@ -83,7 +90,12 @@ function TaskCard({ task }) {
         {task.status === 'accepted' && (
           <button
             onClick={() => completeTask(task.id)}
-            className="flex-1 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1 hover:bg-emerald-500 transition-colors"
+            className="flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1 transition-all"
+            style={{
+              color: '#10b981',
+              background: 'rgba(16,185,129,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(16,185,129,0.15)',
+            }}
           >
             <CheckCircle size={13} /> Mark Delivered
           </button>
@@ -98,9 +110,9 @@ function NotificationItem({ notif }) {
   const clearNotification = useStore(s => s.clearNotification);
 
   const bgStyle = {
-    conflict: 'bg-red-950/30 border-red-900/50',
-    reminder: 'bg-lance-gold-dim border-lance-gold/30',
-  }[notif.type] || 'bg-lance-surface border-lance-border';
+    conflict: 'bg-red-950/30',
+    reminder: 'bg-lance-gold-dim',
+  }[notif.type] || 'bg-lance-surface';
 
   return (
     <div className={`rounded-xl border p-3 mb-2 transition-opacity ${notif.read ? 'opacity-50' : ''} ${bgStyle}`}>
