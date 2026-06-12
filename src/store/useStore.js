@@ -174,10 +174,17 @@ export const useStore = create(
       // ─── Guest Requests ───────────────────────────────────────────────────
       createRequest(guestRoom, floor, typeId) {
         const { supplyUnits } = get();
-        const unit = supplyUnits.find(
+        const typeName = SUPPLY_TYPE_MAP[typeId]?.name;
+
+        // Prefer a unit already on the guest's floor; fall back to any floor
+        let unit = supplyUnits.find(
           u => u.typeId === typeId && u.floor === floor && u.location === 'closet' && u.status === 'available'
         );
-        if (!unit) return { error: 'No available units on this floor' };
+        if (!unit) {
+          unit = supplyUnits.find(
+            u => u.typeId === typeId && u.location === 'closet' && u.status === 'available'
+          );
+        }
 
         const reqId = uid();
         const request = {
@@ -188,17 +195,43 @@ export const useStore = create(
 
         const taskId = get()._createTask({
           type: 'deliver',
-          label: `Deliver ${SUPPLY_TYPE_MAP[typeId]?.name} → Room ${guestRoom}`,
-          supplyUnitIds: [unit.id],
-          fromFloor: floor, fromLocation: 'closet',
-          toFloor: floor, toLocation: String(guestRoom),
+          label: unit
+            ? `Deliver ${typeName} → Room ${guestRoom}`
+            : `Source and deliver ${typeName} → Room ${guestRoom}`,
+          supplyUnitIds: unit ? [unit.id] : [],
+          fromFloor: unit ? unit.floor : floor,
+          fromLocation: 'closet',
+          toFloor: floor,
+          toLocation: String(guestRoom),
           requestId: reqId,
           deadline: null,
         });
 
-        get()._updateUnit(unit.id, { status: 'in_transit' });
+        if (unit) get()._updateUnit(unit.id, { status: 'in_transit' });
         set(s => ({ requests: [...s.requests, { ...request, taskId }] }));
         return { reqId, taskId };
+      },
+
+      cancelRequest(requestId) {
+        const { requests, tasks } = get();
+        const req = requests.find(r => r.id === requestId);
+        if (!req) return;
+
+        const task = tasks.find(t => t.id === req.taskId);
+        if (task?.supplyUnitIds?.length) {
+          set(s => ({
+            supplyUnits: s.supplyUnits.map(u =>
+              task.supplyUnitIds.includes(u.id)
+                ? { ...u, status: 'available', floor: task.fromFloor, location: 'closet' }
+                : u
+            ),
+          }));
+        }
+
+        set(s => ({
+          tasks: s.tasks.filter(t => t.id !== req.taskId),
+          requests: s.requests.filter(r => r.id !== requestId),
+        }));
       },
 
       triggerReturnReminder(requestId) {
