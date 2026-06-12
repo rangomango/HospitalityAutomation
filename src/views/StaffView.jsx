@@ -140,8 +140,14 @@ export default function StaffView() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Sub-tabs */}
-      <div className="bg-lance-surface border-b border-lance-border flex px-3 py-1.5 gap-1 flex-shrink-0">
+      {/* Sub-tabs — same 3D treatment as bottom nav, no border line */}
+      <div
+        className="flex px-3 py-2 gap-1 flex-shrink-0"
+        style={{
+          background: 'linear-gradient(to bottom, #1f3d38 0%, #0c1918 100%)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+        }}
+      >
         {[
           { id: 'tasks',  label: `Tasks (${activeTasks.length})`      },
           { id: 'done',   label: `Done (${completedTasks.length})`     },
@@ -150,11 +156,15 @@ export default function StaffView() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              tab === t.id
-                ? 'bg-lance-accent text-lance-bg'
-                : 'text-lance-text-sub bg-lance-elevated'
-            }`}
+            className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all relative overflow-hidden"
+            style={tab === t.id ? {
+              color: '#2BCA95',
+              background: 'rgba(43,202,149,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
+            } : {
+              color: '#4a7068',
+              background: 'rgba(0,0,0,0.2)',
+            }}
           >
             {t.label}
           </button>

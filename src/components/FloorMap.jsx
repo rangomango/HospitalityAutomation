@@ -19,7 +19,7 @@ const C = {
   bg:        '#08090a',
   surface:   '#0e1c1f',
   elevated:  '#152428',
-  border:    '#1d3535',
+  border:    'rgba(43,202,149,0.2)',
   accent:    '#2BCA95',
   accentLt:  '#7ff2c6',
   gold:      '#C9902F',
@@ -118,17 +118,22 @@ export default function FloorMap() {
 
   return (
     <div>
-      {/* Floor selector */}
+      {/* Floor selector — 3D button treatment */}
       <div className="flex gap-1 mb-3">
         {[1, 2, 3, 4, 5].map(f => (
           <button
             key={f}
             onClick={() => setMapFloor(f)}
-            className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-colors ${
-              f === floor
-                ? 'bg-lance-accent text-lance-bg'
-                : 'bg-lance-elevated text-lance-text-sub hover:text-lance-text-md'
-            }`}
+            className="flex-1 py-1.5 text-sm font-bold rounded-lg transition-all"
+            style={f === floor ? {
+              color: '#2BCA95',
+              background: 'rgba(43,202,149,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
+            } : {
+              color: '#4a7068',
+              background: 'rgba(0,0,0,0.2)',
+              border: '1px solid rgba(43,202,149,0.1)',
+            }}
           >
             {f}
           </button>

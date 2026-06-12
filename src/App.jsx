@@ -43,13 +43,13 @@ export default function App() {
         {activeTab === 'guest' && <GuestView />}
       </main>
 
-      {/* Footer navigation — subtle 3D lift via gradient + shadow */}
+      {/* Footer navigation — more contrast gradient + 3D lift */}
       <nav
         className="flex-shrink-0 safe-bottom"
         style={{
-          background: 'linear-gradient(to bottom, #162a28 0%, #0e1c1f 100%)',
-          borderTop: '1px solid rgba(255,255,255,0.055)',
-          boxShadow: '0 -6px 24px rgba(0,0,0,0.55), 0 -1px 0 rgba(43,202,149,0.07)',
+          background: 'linear-gradient(to bottom, #1f3d38 0%, #0c1918 100%)',
+          borderTop: '1px solid rgba(43,202,149,0.2)',
+          boxShadow: '0 -6px 24px rgba(0,0,0,0.65), 0 -1px 0 rgba(43,202,149,0.08)',
         }}
       >
         <div className="flex">
@@ -106,7 +106,7 @@ export default function App() {
           >
             <div className="flex items-center gap-2">
               <Wrench size={16} className="text-lance-accent" />
-              <h2 className="font-bold text-base text-lance-text">Hotel Setup</h2>
+              <h2 className="font-bold text-base text-lance-text">Hotel Manager</h2>
             </div>
             <button
               onClick={() => setShowSetup(false)}

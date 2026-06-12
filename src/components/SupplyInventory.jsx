@@ -73,17 +73,22 @@ export default function SupplyInventory() {
         </div>
       </div>
 
-      {/* Floor selector */}
+      {/* Floor selector — 3D button treatment */}
       <div className="flex gap-1 mb-3">
         {FLOORS.map(f => (
           <button
             key={f}
             onClick={() => setSelectedFloor(f)}
-            className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-colors ${
-              f === selectedFloor
-                ? 'bg-lance-accent text-lance-bg'
-                : 'bg-lance-elevated text-lance-text-sub hover:text-lance-text-md'
-            }`}
+            className="flex-1 py-1.5 text-sm font-bold rounded-lg transition-all"
+            style={f === selectedFloor ? {
+              color: '#2BCA95',
+              background: 'rgba(43,202,149,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
+            } : {
+              color: '#4a7068',
+              background: 'rgba(0,0,0,0.2)',
+              border: '1px solid rgba(43,202,149,0.1)',
+            }}
           >
             {f}
           </button>

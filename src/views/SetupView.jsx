@@ -85,17 +85,27 @@ export default function SetupView() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Sub-nav */}
-      <div className="bg-lance-surface border-b border-lance-border px-2 py-1.5 flex gap-0.5 flex-shrink-0">
+      {/* Sub-nav — same 3D treatment as bottom nav, no border line */}
+      <div
+        className="px-2 py-2 flex gap-1 flex-shrink-0"
+        style={{
+          background: 'linear-gradient(to bottom, #1f3d38 0%, #0c1918 100%)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+        }}
+      >
         {TABS.map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex-1 flex flex-col items-center py-1.5 rounded-lg text-[10px] font-semibold transition-colors gap-0.5 ${
-              activeTab === id
-                ? 'bg-lance-accent-dim text-lance-accent'
-                : 'text-lance-text-sub hover:text-lance-text-md'
-            }`}
+            className="flex-1 flex flex-col items-center py-1.5 rounded-lg text-[10px] font-semibold transition-all gap-0.5"
+            style={activeTab === id ? {
+              color: '#2BCA95',
+              background: 'rgba(43,202,149,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
+            } : {
+              color: '#4a7068',
+              background: 'rgba(0,0,0,0.2)',
+            }}
           >
             <Icon size={15} />
             {label}
