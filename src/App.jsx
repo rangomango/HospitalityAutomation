@@ -64,7 +64,7 @@ export default function App() {
       {/* Footer navigation */}
       <nav
         className="flex-shrink-0 safe-bottom bg-lance-bg"
-        style={{ boxShadow: '0 -8px 28px rgba(0,0,0,0.7)' }}
+        style={{ boxShadow: '0 -8px 28px rgba(0,0,0,0.7)', paddingBottom: '25px' }}
       >
         <div className="flex">
           {TABS.map(({ id, label, Icon }) => {
