@@ -134,7 +134,7 @@ export default function SetupView() {
             </div>
 
             {showForm && (
-              <div className="bg-lance-elevated border border-lance-border rounded-xl p-4 mb-4">
+              <div className="bg-lance-elevated rounded-xl p-4 mb-4">
                 <p className="text-sm font-bold text-lance-text mb-3">New Event Block</p>
                 <EventForm onClose={() => setShowForm(false)} />
               </div>

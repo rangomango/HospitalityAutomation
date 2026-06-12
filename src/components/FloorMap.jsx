@@ -81,17 +81,24 @@ function Closet({ x, y, h, units }) {
   return (
     <g>
       <rect x={x} y={y} width={CLOSET_W} height={h} rx={4} fill={C.surface} stroke={C.accent} strokeWidth={1.5} />
-      <text x={x + CLOSET_W / 2} y={y + 10} textAnchor="middle" fontSize="7" fill={C.accentLt} fontWeight="700">
+      <text x={x + CLOSET_W / 2} y={y + 11} textAnchor="middle" fontSize="7" fill={C.accentLt} fontWeight="700" letterSpacing={0.5}>
         CLOSET
       </text>
       {types.slice(0, 6).map(([typeId, count], i) => {
         const col = i % 2;
         const row = Math.floor(i / 2);
+        const cx = x + 10 + col * 20;
+        const cy = y + 24 + row * 17;
         return (
           <g key={typeId}>
-            <SupplyDot typeId={typeId} x={x + 10 + col * 20} y={y + 22 + row * 16} />
-            <text x={x + 10 + col * 20 + 8} y={y + 22 + row * 16 + 1} fontSize="6" fill={C.textMd} dominantBaseline="middle">
-              ×{count}
+            {/* dot */}
+            <circle cx={cx} cy={cy} r={5.5} fill={DOT_COLORS[typeId] || C.textSub} opacity={0.85} />
+            <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="5" fontWeight="700" fill="white">
+              {SUPPLY_ABBR[typeId] || '?'}
+            </text>
+            {/* count — bright + bold so it's readable */}
+            <text x={cx + 8} y={cy + 1} fontSize="8" fontWeight="700" fill={C.text} dominantBaseline="middle">
+              {count}
             </text>
           </g>
         );
@@ -220,31 +227,26 @@ export default function FloorMap() {
         </svg>
       </div>
 
-      {/* Closet inventory summary — pill badges for readability */}
-      <div className="mt-4">
-        <p className="text-[10px] font-bold text-lance-text-sub uppercase tracking-widest mb-2">
-          Floor {floor} Closet
-        </p>
-        <div className="grid grid-cols-2 gap-1.5">
-          {SUPPLY_TYPES.map(type => {
-            const count    = closetUnits.filter(u => u.typeId === type.id).length;
-            const inRooms  = floorUnits.filter(u => u.location !== 'closet' && u.typeId === type.id).length;
-            const incoming = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
-            return (
-              <div key={type.id} className="bg-lance-surface rounded-lg px-2.5 py-2 flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1.5 text-xs text-lance-text-md min-w-0">
-                  <SupplyIcon typeId={type.id} size={14} className="text-lance-accent flex-shrink-0" />
-                  <span className="truncate">{type.name}</span>
-                </span>
-                <div className="flex flex-col items-end flex-shrink-0">
-                  <span className="text-sm font-bold text-lance-accent leading-tight">{count}</span>
-                  {incoming > 0 && <span className="text-[9px] text-lance-gold-lt leading-tight">↓{incoming}</span>}
-                  {inRooms > 0  && <span className="text-[9px] text-blue-400 leading-tight">{inRooms} out</span>}
-                </div>
+      {/* Closet inventory summary */}
+      <div className="mt-3">
+        <p className="text-xs font-semibold text-lance-text-sub mb-2">Floor {floor} Closet Inventory</p>
+        {SUPPLY_TYPES.map(type => {
+          const count    = closetUnits.filter(u => u.typeId === type.id).length;
+          const inRooms  = floorUnits.filter(u => u.location !== 'closet' && u.typeId === type.id).length;
+          const incoming = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
+          return (
+            <div key={type.id} className="flex items-center justify-between py-1.5">
+              <span className="text-sm text-lance-text flex items-center gap-1.5">
+                <SupplyIcon typeId={type.id} size={15} className="text-lance-accent" /> {type.name}
+              </span>
+              <div className="flex gap-3 text-xs">
+                <span className="text-lance-accent font-semibold">{count} in closet</span>
+                {incoming > 0 && <span className="text-lance-gold-lt">↓ {incoming} incoming</span>}
+                {inRooms > 0  && <span className="text-blue-400">{inRooms} in rooms</span>}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
