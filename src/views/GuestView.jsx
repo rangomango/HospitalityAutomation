@@ -188,12 +188,17 @@ export default function GuestView() {
                 {cx:'5%',cy:'55%',r:1.5},{cx:'16%',cy:'28%',r:2},{cx:'35%',cy:'60%',r:2},{cx:'53%',cy:'82%',r:2.5},
                 {cx:'67%',cy:'40%',r:1.5},{cx:'81%',cy:'22%',r:2.5},{cx:'95%',cy:'75%',r:2},
               ].map((d, i) => (
-                <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill={`rgba(232,178,84,${0.15 + (d.r / 30)})`} />
+                <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill={`rgba(232,178,84,${0.1875 + (d.r / 24)})`} />
               ))}
             </svg>
-            <p className="relative z-10 text-sm font-semibold px-4 py-2.5 text-center" style={{ color: '#7ff2c6' }}>
-              Welcome {matchingEvent.name} party
-            </p>
+            <div className="relative z-10 flex justify-center px-4 py-2.5">
+              <span
+                className="text-sm font-semibold px-4 py-1 rounded-full"
+                style={{ color: '#2BCA95', background: 'rgba(14,28,31,0.75)' }}
+              >
+                Welcome {matchingEvent.name} party
+              </span>
+            </div>
           </div>
         )}
         <div className="bg-lance-surface rounded-xl px-4 py-3 flex items-center justify-between">
