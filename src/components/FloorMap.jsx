@@ -51,7 +51,7 @@ function SvgIcon({ typeId, x, y, size, color }) {
   );
 }
 
-function Room({ roomNum, floor, x, y, isEvent, suppliesHere }) {
+function Room({ roomNum, floor, x, y, isEvent, suppliesHere, eventShortName }) {
   const bg     = isEvent ? C.event    : C.elevated;
   const border = isEvent ? C.eventBdr : C.border;
   // Unique types in this room, max 2 visible
@@ -62,10 +62,16 @@ function Room({ roomNum, floor, x, y, isEvent, suppliesHere }) {
   return (
     <g>
       <rect x={x} y={y} width={ROOM_W} height={ROOM_H} rx={3} fill={bg} stroke={border} strokeWidth={1} />
-      <text x={x + ROOM_W / 2} y={y + 12} textAnchor="middle" fontSize="7"
+      <text x={x + ROOM_W / 2} y={y + 10} textAnchor="middle" fontSize="6.5"
         fill={isEvent ? C.goldLt : C.textSub} fontWeight="500">
         {`${floor}${String(roomNum).padStart(2, '0')}`}
       </text>
+      {isEvent && eventShortName && (
+        <text x={x + ROOM_W / 2} y={y + 20} textAnchor="middle" fontSize="5"
+          fill={C.gold} fontWeight="600">
+          {eventShortName}
+        </text>
+      )}
       {types.map((typeId, i) => (
         <SvgIcon
           key={typeId}
@@ -76,7 +82,7 @@ function Room({ roomNum, floor, x, y, isEvent, suppliesHere }) {
           color={C.accentLt}
         />
       ))}
-      <title>{`Room ${floor}${String(roomNum).padStart(2, '0')}${isEvent ? ' (Event Guest)' : ''}${types.length ? ' • Has supplies' : ''}`}</title>
+      <title>{`Room ${floor}${String(roomNum).padStart(2, '0')}${isEvent ? ` (${eventShortName || 'Event'})` : ''}${types.length ? ' • Has supplies' : ''}`}</title>
     </g>
   );
 }
@@ -130,6 +136,10 @@ export default function FloorMap() {
   const floor = currentMapFloor;
 
   const eventRoomIds = new Set(events.flatMap(e => e.rooms || []));
+  const roomToEventShort = {};
+  events.forEach(e => (e.rooms || []).forEach(r => {
+    roomToEventShort[r] = e.name.substring(0, 5);
+  }));
   const floorUnits = supplyUnits.filter(u => u.floor === floor);
   const closetUnits = floorUnits.filter(u => u.location === 'closet' && u.status === 'available');
   const unitsInRoom = (roomId) => floorUnits.filter(u => u.location === String(roomId) && u.status === 'checked_out');
@@ -206,6 +216,7 @@ export default function FloorMap() {
                 y={TOP_Y}
                 isEvent={eventRoomIds.has(roomId)}
                 suppliesHere={unitsInRoom(roomId)}
+                eventShortName={roomToEventShort[roomId]}
               />
             );
           })}
@@ -231,6 +242,7 @@ export default function FloorMap() {
                 y={BOT_Y}
                 isEvent={eventRoomIds.has(roomId)}
                 suppliesHere={unitsInRoom(roomId)}
+                eventShortName={roomToEventShort[roomId]}
               />
             );
           })}

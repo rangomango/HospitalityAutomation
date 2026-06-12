@@ -7,8 +7,8 @@ import StaffView from './views/StaffView';
 import GuestView from './views/GuestView';
 
 const TABS = [
-  { id: 'staff', label: 'Staff', Icon: Users },
-  { id: 'guest', label: 'Guest', Icon: User  },
+  { id: 'staff', label: 'Employee', Icon: Users },
+  { id: 'guest', label: 'Guest',    Icon: User  },
 ];
 
 export default function App() {

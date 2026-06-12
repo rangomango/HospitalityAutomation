@@ -55,7 +55,7 @@ export default function SupplyInventory() {
   const [selectedFloor, setSelectedFloor] = useState(1);
   const supplyUnits = useStore(s => s.supplyUnits);
   const clearInventory = useStore(s => s.clearInventory);
-  const totalByType = (typeId) => supplyUnits.filter(u => u.typeId === typeId).length;
+  const totalByType = (typeId) => supplyUnits.filter(u => u.typeId === typeId && u.status !== 'in_transit').length;
 
   return (
     <div>
@@ -81,6 +81,7 @@ export default function SupplyInventory() {
       </div>
 
       {/* Floor selector */}
+      <p className="text-[10px] font-bold text-lance-text-sub uppercase tracking-widest mb-2">Floor</p>
       <div className="flex gap-1 mb-4">
         {FLOORS.map(f => (
           <button

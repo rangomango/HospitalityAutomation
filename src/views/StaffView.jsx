@@ -158,7 +158,13 @@ export default function StaffView() {
   const clearCompletedTasks = useStore(s => s.clearCompletedTasks);
   const unread = useStore(selectors.unreadCount);
 
-  const activeTasks = tasks.filter(t => t.status !== 'completed').sort((a, b) => a.createdAt - b.createdAt);
+  const activeTasks = tasks
+    .filter(t => t.status !== 'completed')
+    .sort((a, b) => {
+      if (a.type === 'deliver' && b.type !== 'deliver') return -1;
+      if (a.type !== 'deliver' && b.type === 'deliver') return 1;
+      return a.createdAt - b.createdAt;
+    });
   const completedTasks = tasks.filter(t => t.status === 'completed').sort((a, b) => b.completedAt - a.completedAt);
 
   return (

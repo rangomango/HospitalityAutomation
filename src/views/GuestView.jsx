@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive } from 'react-icons/md';
+import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive, MdRoomService, MdExplore } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
 import { SupplyIcon } from '../components/SupplyIcon';
@@ -128,6 +128,36 @@ function SupplyCard({ type, floor, guestRoom }) {
   );
 }
 
+function GuestToggles() {
+  const [roomService, setRoomService] = useState(false);
+  const [localGuide, setLocalGuide] = useState(false);
+
+  const toggleStyle = (active) => active
+    ? { color: '#2BCA95', background: 'rgba(43,202,149,0.1)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }
+    : { color: '#4a7068', background: 'rgba(0,0,0,0.2)' };
+
+  return (
+    <div className="flex gap-2 mt-3">
+      <button
+        onClick={() => setRoomService(v => !v)}
+        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
+        style={toggleStyle(roomService)}
+      >
+        <MdRoomService size={16} />
+        Room Service
+      </button>
+      <button
+        onClick={() => setLocalGuide(v => !v)}
+        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
+        style={toggleStyle(localGuide)}
+      >
+        <MdExplore size={16} />
+        Local Guide
+      </button>
+    </div>
+  );
+}
+
 function DevPanel({ guestRoom, onOpenSetup }) {
   const requests = useStore(s => s.requests);
   const triggerReminder = useStore(s => s.triggerReturnReminder);
@@ -228,6 +258,7 @@ export default function GuestView({ onOpenSetup }) {
           </>
         )}
 
+        <GuestToggles />
         <DevPanel guestRoom={guestRoom} onOpenSetup={onOpenSetup} />
       </div>
     </div>

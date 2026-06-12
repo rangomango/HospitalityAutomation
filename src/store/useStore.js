@@ -131,7 +131,7 @@ export const useStore = create(
 
           get()._createTask({
             type: 'forward_deploy',
-            label: `Move ${freshUnits.length} ${plan.typeName}${freshUnits.length !== 1 ? 's' : ''} to Floor ${plan.toFloor} in preparation for ${plan.eventName}`,
+            label: `Move ${freshUnits.length} ${plan.typeName}${freshUnits.length !== 1 ? 's' : ''} to Floor ${plan.toFloor} in preparation for the ${plan.eventName}`,
             supplyUnitIds: freshUnits.map(u => u.id),
             fromFloor: freshUnits[0].floor,
             fromLocation: 'closet',
