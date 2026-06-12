@@ -33,7 +33,7 @@ function EventCard({ event }) {
   };
 
   return (
-    <div className="bg-lance-surface border border-lance-border rounded-xl p-3 mb-2">
+    <div className="bg-lance-surface rounded-xl p-3 mb-2">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -47,7 +47,7 @@ function EventCard({ event }) {
             <p className="text-xs text-lance-text-md flex items-center gap-1.5"><MdCalendarMonth size={12} /> {event.date} at {event.startTime}</p>
             <p className="text-xs text-lance-text-md flex items-center gap-1.5"><MdLocalShipping size={12} /> Deploy by {deployTime} ({event.bufferHours}h buffer)</p>
             <p className="text-xs text-lance-text-md">
-              🏨 {event.rooms?.length || 0} rooms · Floors {floors.join(', ')} · ~{suppliesNeeded} units/type needed
+              {event.rooms?.length || 0} rooms · Floors {floors.join(', ')} · ~{suppliesNeeded} units/type needed
             </p>
           </div>
         </div>
@@ -59,14 +59,24 @@ function EventCard({ event }) {
         </button>
       </div>
 
-      <div className="mt-2.5 pt-2.5 border-t border-lance-border-sub flex items-center gap-2">
+      <div className="mt-2.5 flex items-center gap-2">
         <button
           onClick={handleTrigger}
-          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-            triggerState === 'ok'    ? 'bg-lance-accent-dim text-lance-accent-lt' :
-            triggerState === 'empty' ? 'bg-lance-elevated text-lance-text-sub' :
-            'bg-lance-gold-dim text-lance-gold-lt hover:bg-lance-gold/20'
-          }`}
+          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+          style={
+            triggerState === 'ok' ? {
+              color: '#2BCA95',
+              background: 'rgba(43,202,149,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)',
+            } : triggerState === 'empty' ? {
+              color: '#4a7068',
+              background: 'rgba(0,0,0,0.2)',
+            } : {
+              color: '#e8b254',
+              background: 'rgba(201,144,47,0.07)',
+              boxShadow: 'inset 0 1px 0 rgba(201,144,47,0.15)',
+            }
+          }
         >
           <Zap size={12} />
           {triggerState === 'ok'    ? 'Tasks created!' :

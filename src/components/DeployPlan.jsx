@@ -47,7 +47,7 @@ export default function DeployPlan() {
     <div className="space-y-4">
       {/* Shortage warnings */}
       {conflicts.length > 0 && (
-        <div className="bg-red-950/40 border border-red-900/50 rounded-xl p-3">
+        <div className="bg-red-950/40 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle size={16} className="text-red-400" />
             <p className="text-sm font-bold text-red-300">Supply Shortages Detected</p>
@@ -68,8 +68,8 @@ export default function DeployPlan() {
       {Object.entries(byEvent).map(([eventName, items]) => {
         const deadline = items[0]?.deadline;
         return (
-          <div key={eventName} className="bg-lance-surface border border-lance-border rounded-xl overflow-hidden">
-            <div className="px-3 py-2 bg-lance-elevated border-b border-lance-border flex items-center justify-between">
+          <div key={eventName} className="bg-lance-surface rounded-xl overflow-hidden">
+            <div className="px-3 py-2 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold text-lance-text">{eventName}</p>
                 {deadline && (
@@ -78,11 +78,10 @@ export default function DeployPlan() {
                   </p>
                 )}
               </div>
-              <ChevronRight size={16} className="text-lance-text-sub" />
             </div>
             <div>
               {items.map((p, i) => (
-                <div key={i} className="px-3 py-2.5 flex items-center justify-between">
+                <div key={i} className="px-3 py-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <SupplyIcon typeId={p.typeId} size={18} className="text-lance-accent flex-shrink-0" />
                     <div>

@@ -98,22 +98,18 @@ export default function SupplyInventory() {
       <div className="mb-2">
         <p className="text-[10px] font-bold text-lance-accent uppercase tracking-widest mb-2">Room Equipment</p>
         <div className="bg-lance-surface rounded-xl px-3">
-          {SUPPLY_TYPES.filter(t => t.category === 'room_equipment').map((type, i, arr) => (
-            <div key={type.id} className={i < arr.length - 1 ? 'border-b border-lance-border-sub' : ''}>
-              <SupplyRow type={type} floor={selectedFloor} />
-            </div>
+          {SUPPLY_TYPES.filter(t => t.category === 'room_equipment').map(type => (
+            <SupplyRow key={type.id} type={type} floor={selectedFloor} />
           ))}
         </div>
       </div>
 
-      {/* Personal Care — no borders */}
+      {/* Personal Care */}
       <div>
         <p className="text-[10px] font-bold text-lance-accent-lt uppercase tracking-widest mb-2">Personal Care</p>
         <div className="bg-lance-surface rounded-xl px-3">
-          {SUPPLY_TYPES.filter(t => t.category === 'personal_care').map((type, i, arr) => (
-            <div key={type.id} className={i < arr.length - 1 ? 'border-b border-lance-border-sub' : ''}>
-              <SupplyRow type={type} floor={selectedFloor} />
-            </div>
+          {SUPPLY_TYPES.filter(t => t.category === 'personal_care').map(type => (
+            <SupplyRow key={type.id} type={type} floor={selectedFloor} />
           ))}
         </div>
       </div>

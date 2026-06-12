@@ -228,7 +228,7 @@ export default function FloorMap() {
           const inRooms = floorUnits.filter(u => u.location !== 'closet' && u.typeId === type.id).length;
           const incoming = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
           return (
-            <div key={type.id} className="flex items-center justify-between py-1.5 border-b border-lance-border-sub last:border-0">
+            <div key={type.id} className="flex items-center justify-between py-1.5">
               <span className="text-sm text-lance-text flex items-center gap-1.5">
                 <SupplyIcon typeId={type.id} size={15} className="text-lance-accent" /> {type.name}
               </span>
