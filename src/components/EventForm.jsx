@@ -102,11 +102,11 @@ export default function EventForm({ onClose, initialData, onSave }) {
       <div className="grid grid-cols-2 gap-3">
         <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Date</label>
-          <input type="date" className={inputCls} style={inputStyle} value={form.date} onChange={e => set('date', e.target.value)} />
+          <input type="date" className="w-full min-w-0 rounded-lg text-lance-text focus:outline-none transition-colors" style={{ ...inputStyle, fontSize: '14px', padding: '8px 10px', boxSizing: 'border-box' }} value={form.date} onChange={e => set('date', e.target.value)} />
         </div>
         <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Start Time</label>
-          <input type="time" className={inputCls} style={inputStyle} value={form.startTime} onChange={e => set('startTime', e.target.value)} />
+          <input type="time" className="w-full min-w-0 rounded-lg text-lance-text focus:outline-none transition-colors" style={{ ...inputStyle, fontSize: '14px', padding: '8px 10px', boxSizing: 'border-box' }} value={form.startTime} onChange={e => set('startTime', e.target.value)} />
         </div>
       </div>
 
