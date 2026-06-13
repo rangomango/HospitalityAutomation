@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PlusCircle, Save } from 'lucide-react';
+import { PlusCircle, Save, Plus, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { EVENT_TYPES, FLOORS } from '../data/constants';
 
@@ -10,7 +10,7 @@ const empty = {
   bufferHours: 3, floorStart: 1, floorEnd: 1, roomStart: 1, roomEnd: 10,
 };
 
-const inputCls = 'w-full rounded-lg px-3 py-2 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none focus:border-lance-accent focus:ring-1 focus:ring-lance-accent/20 transition-colors';
+const inputCls = 'w-full min-w-0 rounded-lg px-2.5 py-2 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none focus:border-lance-accent transition-colors';
 const inputStyle = { background: '#232b2f', border: '1px solid rgba(255,255,255,0.1)' };
 const selectCls = inputCls;
 
@@ -36,10 +36,18 @@ export default function EventForm({ onClose, initialData, onSave }) {
   const updateEvent = useStore(s => s.updateEvent);
   const isEditing   = !!initialData;
 
-  const [form, setForm] = useState(isEditing ? deriveFormFromEvent(initialData) : empty);
+  const derived = isEditing ? deriveFormFromEvent(initialData) : empty;
+  const [form, setForm] = useState(derived);
   const [error, setError] = useState('');
+  const [showFloorEnd, setShowFloorEnd] = useState(
+    isEditing && derived.floorStart !== derived.floorEnd
+  );
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleFloorStart = (v) => {
+    setForm(f => ({ ...f, floorStart: v, floorEnd: showFloorEnd ? f.floorEnd : v }));
+  };
 
   const buildRooms = () => {
     const rooms = [];
@@ -77,13 +85,13 @@ export default function EventForm({ onClose, initialData, onSave }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
+        <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Event Type</label>
           <select className={selectCls} style={inputStyle} value={form.type} onChange={e => set('type', e.target.value)}>
             {EVENT_TYPES.map(t => <option key={t}>{t}</option>)}
           </select>
         </div>
-        <div>
+        <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Deploy Buffer</label>
           <select className={selectCls} style={inputStyle} value={form.bufferHours} onChange={e => set('bufferHours', e.target.value)}>
             {[1,2,3,4,5,6].map(h => <option key={h} value={h}>{h}h before</option>)}
@@ -91,12 +99,12 @@ export default function EventForm({ onClose, initialData, onSave }) {
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Date</label>
           <input type="date" className={inputCls} style={inputStyle} value={form.date} onChange={e => set('date', e.target.value)} />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Start Time</label>
           <input type="time" className={inputCls} style={inputStyle} value={form.startTime} onChange={e => set('startTime', e.target.value)} />
         </div>
@@ -104,27 +112,56 @@ export default function EventForm({ onClose, initialData, onSave }) {
 
       <div>
         <label className="block text-xs font-semibold text-lance-text-sub mb-2">Room Block</label>
-        <div className="grid grid-cols-2 gap-3 mb-2">
-          <div>
-            <label className="block text-[10px] text-lance-text-sub mb-0.5">Floor start</label>
-            <select className={selectCls} style={inputStyle} value={form.floorStart} onChange={e => set('floorStart', e.target.value)}>
+
+        {/* Floor row */}
+        <div className="flex items-end gap-2 mb-2">
+          <div className="flex-1 min-w-0">
+            <label className="block text-[10px] text-lance-text-sub mb-0.5">
+              {showFloorEnd ? 'Floor start' : 'Floor'}
+            </label>
+            <select className={selectCls} style={inputStyle} value={form.floorStart} onChange={e => handleFloorStart(e.target.value)}>
               {FLOORS.map(f => <option key={f} value={f}>Floor {f}</option>)}
             </select>
           </div>
-          <div>
-            <label className="block text-[10px] text-lance-text-sub mb-0.5">Floor end</label>
-            <select className={selectCls} style={inputStyle} value={form.floorEnd} onChange={e => set('floorEnd', e.target.value)}>
-              {FLOORS.map(f => <option key={f} value={f}>Floor {f}</option>)}
-            </select>
-          </div>
+
+          {showFloorEnd ? (
+            <>
+              <span className="text-lance-text-sub text-xs pb-2.5 flex-shrink-0">to</span>
+              <div className="flex-1 min-w-0">
+                <label className="block text-[10px] text-lance-text-sub mb-0.5">Floor end</label>
+                <select className={selectCls} style={inputStyle} value={form.floorEnd} onChange={e => set('floorEnd', e.target.value)}>
+                  {FLOORS.map(f => <option key={f} value={f}>Floor {f}</option>)}
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setShowFloorEnd(false); set('floorEnd', form.floorStart); }}
+                className="flex-shrink-0 w-7 h-7 mb-0.5 rounded-full flex items-center justify-center transition-colors"
+                style={{ background: 'rgba(0,0,0,0.25)', color: '#4a7068' }}
+              >
+                <X size={12} />
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowFloorEnd(true)}
+              className="flex-shrink-0 w-7 h-7 mb-0.5 rounded-full flex items-center justify-center transition-colors"
+              style={{ background: 'rgba(43,202,149,0.1)', color: '#2BCA95' }}
+            >
+              <Plus size={13} />
+            </button>
+          )}
         </div>
+
+        {/* Room range */}
         <div className="grid grid-cols-2 gap-3">
-          <div>
+          <div className="min-w-0">
             <label className="block text-[10px] text-lance-text-sub mb-0.5">Room start (1–20)</label>
             <input type="number" min={1} max={20} className={inputCls} style={inputStyle}
               value={form.roomStart} onChange={e => set('roomStart', e.target.value)} />
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="block text-[10px] text-lance-text-sub mb-0.5">Room end (1–20)</label>
             <input type="number" min={1} max={20} className={inputCls} style={inputStyle}
               value={form.roomEnd} onChange={e => set('roomEnd', e.target.value)} />
