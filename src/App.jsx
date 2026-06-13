@@ -15,9 +15,17 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('staff');
   const [showSetup, setShowSetup] = useState(false);
   const [guestOverlayOpen, setGuestOverlayOpen] = useState(false);
+  const [showResetToast, setShowResetToast] = useState(false);
   const unread = useStore(selectors.unreadCount);
   const guestRoom = useStore(s => s.guestRoom);
   const setGuestRoom = useStore(s => s.setGuestRoom);
+  const resetAll = useStore(s => s.resetAll);
+
+  const handleConfirmReset = () => {
+    resetAll();
+    setShowResetToast(false);
+    setShowSetup(false);
+  };
 
   const subtitle = activeTab === 'staff' ? 'Task manager' : activeTab === 'guest' ? 'Guest services' : null;
 
@@ -115,7 +123,13 @@ export default function App() {
         >
           <div className="relative bg-lance-surface px-4 pt-10 pb-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">
-              <MdManageAccounts size={26} className="text-lance-accent" />
+              <button
+                onClick={() => setShowResetToast(true)}
+                className="p-0.5 -m-0.5 rounded-lg transition-opacity active:opacity-50"
+                aria-label="Hard reset"
+              >
+                <MdManageAccounts size={26} className="text-lance-accent" />
+              </button>
               <div>
                 <h2 className="font-bold text-base leading-tight text-lance-text">Hotel Manager</h2>
                 <p className="text-[11px] text-lance-text-sub">Supply management</p>
@@ -132,6 +146,36 @@ export default function App() {
           <div className="flex-1 overflow-hidden" style={{ background: '#08090a' }}>
             <SetupView />
           </div>
+
+          {/* Hard reset toast */}
+          {showResetToast && (
+            <div className="absolute inset-0 z-10 flex items-end" style={{ background: 'rgba(0,0,0,0.55)' }}>
+              <div
+                className="w-full px-4 pb-8 pt-1"
+                style={{ background: '#191e21', borderTop: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px 20px 0 0' }}
+              >
+                <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <p className="text-base font-bold text-white mb-1">Reset all app data?</p>
+                <p className="text-sm text-lance-text-sub mb-6 leading-snug">
+                  This will wipe all events, inventory, tasks, and guest data. It cannot be undone.
+                </p>
+                <button
+                  onClick={handleConfirmReset}
+                  className="w-full py-3 rounded-xl text-sm font-bold mb-3"
+                  style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}
+                >
+                  Reset everything
+                </button>
+                <button
+                  onClick={() => setShowResetToast(false)}
+                  className="w-full py-3 rounded-xl text-sm font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: '#a0b8b2' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
