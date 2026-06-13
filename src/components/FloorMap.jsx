@@ -288,11 +288,11 @@ export default function FloorMap() {
             const inTransit      = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
             const incPending     = incomingPending[type.id] || 0;
             const incTransit     = incomingTransit[type.id] || 0;
-            const totalPending   = pendingTransit + incPending;
-            const totalTransit   = inTransit + incTransit;
-            // Requested but nothing available to send (deploy plan has toSend > 0, canFulfill === 0)
-            const unavailable    = deployPlan.some(
-              p => p.toFloor === floor && p.typeId === type.id && p.toSend > 0 && p.canFulfill === 0
+            const totalPending = pendingTransit + incPending;
+            const totalTransit = inTransit + incTransit;
+            // Show "see status" only when deployment is already in motion AND plan still shows a shortage
+            const seeStatus = (totalPending + totalTransit) > 0 && deployPlan.some(
+              p => p.toFloor === floor && p.typeId === type.id && p.shortage > 0
             );
             return (
               <div key={type.id} className="flex items-center justify-between py-1.5">
@@ -301,9 +301,9 @@ export default function FloorMap() {
                 </span>
                 <div className="flex gap-3 text-xs flex-wrap justify-end">
                   <span className="text-lance-accent font-semibold">{count} in closet</span>
-                  {unavailable && totalPending === 0 && <span style={{ color: '#f87171' }}>requested but unavailable</span>}
                   {totalPending > 0 && <span className="text-lance-text-sub">{totalPending} pending transit</span>}
                   {totalTransit > 0 && <span className="text-lance-gold-lt">{totalTransit} in transit</span>}
+                  {seeStatus        && <span style={{ color: '#94a3b8' }}>see status</span>}
                   {inRooms > 0      && <span className="text-blue-400">{inRooms} in rooms</span>}
                 </div>
               </div>
