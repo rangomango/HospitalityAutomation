@@ -336,7 +336,7 @@ function ChatView({ guestRoom, onClose }) {
     {
       id: 'welcome',
       from: 'hotel',
-      text: `Welcome to the Claremont Resort & Spa! 🏨 How can we help you today?`,
+      text: `Welcome to the Claremont Resort & Spa. How can we help you today?`,
       time: Date.now(),
     },
   ]);

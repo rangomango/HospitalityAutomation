@@ -59,29 +59,29 @@ export default function SupplyInventory() {
 
   return (
     <div>
-      {/* Global totals — no border */}
+      {/* Global totals */}
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-semibold text-lance-text-sub uppercase tracking-wide">Total Inventory</p>
+        {supplyUnits.length > 0 && (
+          <button onClick={clearInventory} className="text-xs text-red-400 font-semibold">
+            Reset all
+          </button>
+        )}
+      </div>
       <div className="bg-lance-surface rounded-xl p-3 mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-semibold text-lance-text-sub uppercase tracking-wide">Total Inventory</p>
-          {supplyUnits.length > 0 && (
-            <button onClick={clearInventory} className="text-xs text-red-400 font-semibold">
-              Reset all
-            </button>
-          )}
-        </div>
         <div className="grid grid-cols-3 gap-2">
           {SUPPLY_TYPES.map(t => (
             <div key={t.id} className="bg-lance-elevated rounded-lg p-2.5 text-center">
               <SupplyIcon typeId={t.id} size={22} className="text-lance-accent mx-auto mb-1" />
-              <div className="text-sm font-bold text-lance-accent">{totalByType(t.id)}</div>
-              <div className="text-[9px] text-lance-text-sub leading-tight">{t.name}</div>
+              <div className="text-sm font-bold text-white">{totalByType(t.id)}</div>
+              <div className="text-[9px] text-white leading-tight">{t.name}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Floor selector */}
-      <p className="text-[10px] font-bold text-lance-text-sub uppercase tracking-widest mb-2">Floor</p>
+      <p className="text-[10px] font-bold text-lance-accent uppercase tracking-widest mb-2">Floor</p>
       <div className="flex gap-1 mb-4">
         {FLOORS.map(f => (
           <button
