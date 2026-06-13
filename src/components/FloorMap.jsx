@@ -304,7 +304,7 @@ export default function FloorMap() {
                   {totalPending > 0 && <span className="text-lance-text-sub">{totalPending} pending transit</span>}
                   {totalTransit > 0 && <span className="text-lance-gold-lt">{totalTransit} in transit</span>}
                   {seeStatus        && <span style={{ color: '#94a3b8' }}>see status</span>}
-                  {inRooms > 0      && <span className="text-blue-400">{inRooms} in rooms</span>}
+                  {inRooms > 0      && <span className="text-blue-400">{inRooms} in {inRooms === 1 ? 'room' : 'rooms'}</span>}
                 </div>
               </div>
             );
