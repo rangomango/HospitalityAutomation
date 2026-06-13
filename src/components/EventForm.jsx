@@ -92,7 +92,7 @@ export default function EventForm({ onClose, initialData, onSave }) {
           </select>
         </div>
         <div className="min-w-0">
-          <label className="block text-xs font-semibold text-lance-text-sub mb-1">Deploy Buffer</label>
+          <label className="block text-xs font-semibold text-lance-text-sub mb-1">Deploy</label>
           <select className={selectCls} style={inputStyle} value={form.bufferHours} onChange={e => set('bufferHours', e.target.value)}>
             {[1,2,3,4,5,6].map(h => <option key={h} value={h}>{h}h before</option>)}
           </select>
@@ -100,13 +100,13 @@ export default function EventForm({ onClose, initialData, onSave }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="min-w-0 overflow-hidden">
+        <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Date</label>
-          <input type="date" className="w-full min-w-0 rounded-lg px-2 py-2 text-[11px] text-lance-text focus:outline-none transition-colors" style={inputStyle} value={form.date} onChange={e => set('date', e.target.value)} />
+          <input type="date" className={inputCls} style={inputStyle} value={form.date} onChange={e => set('date', e.target.value)} />
         </div>
-        <div className="min-w-0 overflow-hidden">
+        <div className="min-w-0">
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Start Time</label>
-          <input type="time" className="w-full min-w-0 rounded-lg px-2 py-2 text-[11px] text-lance-text focus:outline-none transition-colors" style={inputStyle} value={form.startTime} onChange={e => set('startTime', e.target.value)} />
+          <input type="time" className={inputCls} style={inputStyle} value={form.startTime} onChange={e => set('startTime', e.target.value)} />
         </div>
       </div>
 
