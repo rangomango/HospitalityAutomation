@@ -163,8 +163,27 @@ function SupplyCard({ type, floor, guestRoom }) {
 }
 
 function RoomServiceView({ guestRoom, onClose }) {
-  const [cart, setCart] = useState({});
-  const [ordered, setOrdered] = useState(false);
+  const roomServiceOrders = useStore(s => s.roomServiceOrders);
+  const tasks = useStore(s => s.tasks);
+  const placeRoomServiceOrder = useStore(s => s.placeRoomServiceOrder);
+  const updateRoomServiceOrder = useStore(s => s.updateRoomServiceOrder);
+
+  const floor = Math.floor(guestRoom / 100);
+  const allItems = ROOM_SERVICE_MENU.flatMap(s => s.items);
+
+  const activeOrder = roomServiceOrders.find(o => {
+    if (o.guestRoom !== guestRoom) return false;
+    const t = tasks.find(t => t.id === o.taskId);
+    return !t || t.status !== 'completed';
+  });
+  const orderTask = activeOrder ? tasks.find(t => t.id === activeOrder.taskId) : null;
+
+  const [cart, setCart] = useState(() => {
+    if (!activeOrder) return {};
+    const c = {};
+    activeOrder.items.forEach(i => { c[i.id] = i.qty; });
+    return c;
+  });
 
   const addItem = (id) => setCart(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
   const removeItem = (id) => setCart(c => {
@@ -172,23 +191,60 @@ function RoomServiceView({ guestRoom, onClose }) {
     return { ...c, [id]: c[id] - 1 };
   });
 
-  const allItems = ROOM_SERVICE_MENU.flatMap(s => s.items);
   const total = allItems.reduce((sum, item) => sum + (cart[item.id] || 0) * item.price, 0);
   const itemCount = Object.values(cart).reduce((s, q) => s + q, 0);
 
-  const handleOrder = () => {
+  const cartMatchesOrder = !!(activeOrder && (() => {
+    const orderMap = {};
+    activeOrder.items.forEach(i => { orderMap[i.id] = i.qty; });
+    return allItems.every(item => (cart[item.id] || 0) === (orderMap[item.id] || 0));
+  })());
+
+  const isDelivered = orderTask?.status === 'completed';
+  const isPlaced = !!(activeOrder && cartMatchesOrder && !isDelivered);
+  const canUpdate = !!(activeOrder && !cartMatchesOrder && itemCount > 0 && !isDelivered);
+  const canPlace = !!(activeOrder == null && itemCount > 0);
+
+  const handleAction = () => {
     if (!itemCount) return;
-    setOrdered(true);
-    setTimeout(() => { setOrdered(false); setCart({}); }, 3000);
+    const cartItems = allItems.filter(i => cart[i.id]).map(i => ({ id: i.id, name: i.name, qty: cart[i.id], price: i.price }));
+    if (!activeOrder) {
+      placeRoomServiceOrder(guestRoom, floor, cartItems, total);
+    } else if (canUpdate) {
+      updateRoomServiceOrder(activeOrder.id, cartItems, total);
+    }
   };
+
+  let btnLabel, btnStyle, btnDisabled;
+  if (isDelivered) {
+    btnLabel = '✓ Delivered!'; btnDisabled = true;
+    btnStyle = { color: '#2BCA95', background: 'rgba(43,202,149,0.1)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' };
+  } else if (isPlaced) {
+    btnLabel = '✓ Order placed!'; btnDisabled = true;
+    btnStyle = { color: '#2BCA95', background: 'rgba(43,202,149,0.1)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' };
+  } else if (canUpdate) {
+    btnLabel = `Update Order · $${total.toFixed(2)}`; btnDisabled = false;
+    btnStyle = { background: '#e8b254', color: '#08090a' };
+  } else if (canPlace) {
+    btnLabel = `Place Order · $${total.toFixed(2)}`; btnDisabled = false;
+    btnStyle = { background: '#2BCA95', color: '#08090a' };
+  } else {
+    btnLabel = 'Select items to order'; btnDisabled = true;
+    btnStyle = { background: 'rgba(0,0,0,0.2)', color: '#4a7068' };
+  }
+
+  const statusText = isDelivered
+    ? '✓ Your order has been delivered'
+    : orderTask?.status === 'accepted'
+      ? 'Being prepared — on its way!'
+      : activeOrder
+        ? `Order received ${formatDistanceToNow(activeOrder.placedAt, { addSuffix: true })}`
+        : null;
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col" style={{ background: '#08090a' }}>
       <div className="px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0 bg-lance-surface">
-        <button
-          onClick={onClose}
-          className="p-1.5 text-lance-text-sub hover:text-lance-text transition-colors"
-        >
+        <button onClick={onClose} className="p-1.5 text-lance-text-sub hover:text-lance-text transition-colors">
           <ArrowLeft size={18} />
         </button>
         <MdRoomService size={20} className="text-lance-accent" />
@@ -215,6 +271,7 @@ function RoomServiceView({ guestRoom, onClose }) {
                   {!cart[item.id] ? (
                     <button
                       onClick={() => addItem(item.id)}
+                      disabled={isDelivered}
                       className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
                       style={{ color: '#2BCA95', background: 'rgba(43,202,149,0.07)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }}
                     >
@@ -250,25 +307,24 @@ function RoomServiceView({ guestRoom, onClose }) {
         className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-8 flex-shrink-0"
         style={{ background: 'linear-gradient(to top, #08090a 70%, transparent)' }}
       >
-        {itemCount > 0 && (
+        {itemCount > 0 && !isPlaced && !isDelivered && (
           <div className="flex items-center justify-between mb-2 px-1">
             <p className="text-xs text-lance-text-sub">{itemCount} item{itemCount !== 1 ? 's' : ''}</p>
             <p className="text-base font-bold text-lance-text">${total.toFixed(2)}</p>
           </div>
         )}
+        {statusText && (
+          <p className="text-xs text-center mb-2" style={{ color: isDelivered ? '#2BCA95' : '#7aa89e' }}>
+            {statusText}
+          </p>
+        )}
         <button
-          onClick={handleOrder}
-          disabled={!itemCount}
+          onClick={handleAction}
+          disabled={btnDisabled}
           className="w-full py-3 rounded-xl text-sm font-bold transition-all"
-          style={
-            ordered
-              ? { color: '#2BCA95', background: 'rgba(43,202,149,0.1)', boxShadow: 'inset 0 1px 0 rgba(43,202,149,0.15)' }
-              : itemCount
-                ? { background: '#2BCA95', color: '#08090a' }
-                : { background: 'rgba(0,0,0,0.2)', color: '#4a7068' }
-          }
+          style={btnStyle}
         >
-          {ordered ? '✓ Order placed!' : itemCount ? `Place Order · $${total.toFixed(2)}` : 'Select items to order'}
+          {btnLabel}
         </button>
       </div>
     </div>
@@ -542,12 +598,15 @@ function DevPanel({ guestRoom, onOpenSetup }) {
   );
 }
 
-export default function GuestView({ onOpenSetup }) {
+export default function GuestView({ onOpenSetup, onOverlayChange }) {
   const guestRoom = useStore(s => s.guestRoom);
   const events = useStore(s => s.events);
   const [showRoomService, setShowRoomService] = useState(false);
   const [showLocalGuide, setShowLocalGuide] = useState(false);
   const [showChat, setShowChat] = useState(false);
+
+  const anyOverlayOpen = showRoomService || showLocalGuide || showChat;
+  useEffect(() => { onOverlayChange?.(anyOverlayOpen); }, [anyOverlayOpen]);
 
   if (!guestRoom) return <RoomEntry />;
 
@@ -580,7 +639,7 @@ export default function GuestView({ onOpenSetup }) {
             <div className="relative z-10 flex justify-center px-4 py-2.5">
               <span
                 className="text-sm font-semibold px-4 py-1 rounded-lg"
-                style={{ color: '#23a87c', background: 'rgba(0,0,0,0.8)' }}
+                style={{ color: '#ffffff', background: 'rgba(0,0,0,0.8)' }}
               >
                 Welcome {matchingEvent.name} party
               </span>

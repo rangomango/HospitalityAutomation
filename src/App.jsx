@@ -14,6 +14,7 @@ const TABS = [
 export default function App() {
   const [activeTab, setActiveTab] = useState('staff');
   const [showSetup, setShowSetup] = useState(false);
+  const [guestOverlayOpen, setGuestOverlayOpen] = useState(false);
   const unread = useStore(selectors.unreadCount);
   const guestRoom = useStore(s => s.guestRoom);
   const setGuestRoom = useStore(s => s.setGuestRoom);
@@ -42,8 +43,8 @@ export default function App() {
               <Wrench size={18} />
             </button>
           )}
-          {/* Guest + room selected: X exits room view */}
-          {activeTab === 'guest' && guestRoom && (
+          {/* Guest + room selected: X exits room view (hidden when overlay is open) */}
+          {activeTab === 'guest' && guestRoom && !guestOverlayOpen && (
             <button
               onClick={() => setGuestRoom(null)}
               className="p-2 text-lance-text-sub hover:text-lance-text transition-colors"
@@ -58,7 +59,7 @@ export default function App() {
       {/* Main content */}
       <main className="flex-1 overflow-hidden">
         {activeTab === 'staff' && <StaffView />}
-        {activeTab === 'guest' && <GuestView onOpenSetup={() => setShowSetup(true)} />}
+        {activeTab === 'guest' && <GuestView onOpenSetup={() => setShowSetup(true)} onOverlayChange={setGuestOverlayOpen} />}
       </main>
 
       {/* Footer navigation */}

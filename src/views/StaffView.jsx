@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, CheckCircle, Clock, Truck, Package, AlertTriangle, ChevronRight, BellOff, Timer } from 'lucide-react';
+import { Bell, CheckCircle, Clock, Truck, Package, AlertTriangle, ChevronRight, BellOff, Timer, UtensilsCrossed } from 'lucide-react';
 import { useStore, selectors } from '../store/useStore';
 import { SUPPLY_TYPE_MAP } from '../data/constants';
 import { formatDistanceToNow } from 'date-fns';
@@ -8,6 +8,7 @@ const TYPE_ICON = {
   forward_deploy: <Truck size={14} className="text-lance-accent" />,
   deliver:        <Package size={14} className="text-emerald-400" />,
   retrieve:       <ChevronRight size={14} className="text-lance-text-sub" />,
+  room_service:   <UtensilsCrossed size={14} className="text-orange-400" />,
 };
 
 const NOTIF_ICONS = {
@@ -33,6 +34,7 @@ function TaskCard({ task }) {
     forward_deploy: 'Replenish',
     deliver:        'Guest Delivery',
     retrieve:       'Item Retrieval',
+    room_service:   'Room Service',
   }[task.type] || task.type;
 
   const statusBadgeStyle = {
@@ -158,11 +160,12 @@ export default function StaffView() {
   const clearCompletedTasks = useStore(s => s.clearCompletedTasks);
   const unread = useStore(selectors.unreadCount);
 
+  const isGuestTask = (t) => t.type === 'deliver' || t.type === 'room_service';
   const activeTasks = tasks
     .filter(t => t.status !== 'completed')
     .sort((a, b) => {
-      if (a.type === 'deliver' && b.type !== 'deliver') return -1;
-      if (a.type !== 'deliver' && b.type === 'deliver') return 1;
+      if (isGuestTask(a) && !isGuestTask(b)) return -1;
+      if (!isGuestTask(a) && isGuestTask(b)) return 1;
       if (a.type === 'forward_deploy' && b.type === 'forward_deploy') {
         const floorDiff = (a.fromFloor || 0) - (b.fromFloor || 0);
         return floorDiff !== 0 ? floorDiff : a.createdAt - b.createdAt;

@@ -12,10 +12,13 @@ const initialState = {
   // { id, typeId, floor, location: 'closet'|roomId, status: 'available'|'in_transit'|'checked_out' }
 
   tasks: [],
-  // { id, type:'forward_deploy'|'deliver'|'retrieve', label, supplyUnitIds, fromFloor, fromLocation, toFloor, toLocation, status:'pending'|'accepted'|'completed', staffId, requestId, deadline, createdAt }
+  // { id, type:'forward_deploy'|'deliver'|'retrieve'|'room_service', label, supplyUnitIds, fromFloor, fromLocation, toFloor, toLocation, status:'pending'|'accepted'|'completed', staffId, requestId, orderId, deadline, createdAt }
 
   requests: [],
   // { id, guestRoom, floor, typeId, status:'pending'|'assigned'|'delivered'|'returned', taskId, requestedAt, deliveredAt, reminderSent }
+
+  roomServiceOrders: [],
+  // { id, guestRoom, floor, items: [{id, name, qty, price}], total, taskId, placedAt, updatedAt }
 
   notifications: [],
   // { id, type:'task'|'request'|'conflict'|'reminder', message, read, createdAt }
@@ -182,6 +185,42 @@ export const useStore = create(
         }
 
         return get().createDeployTasks(plan);
+      },
+
+      // ─── Room Service Orders ──────────────────────────────────────────────
+      placeRoomServiceOrder(guestRoom, floor, items, total) {
+        const orderId = uid();
+        const itemStr = items.map(i => `${i.qty}× ${i.name}`).join(', ');
+        const label = `Room ${guestRoom} — Room Service: ${itemStr} · $${total.toFixed(2)}`;
+        const taskId = get()._createTask({
+          type: 'room_service',
+          label,
+          supplyUnitIds: [],
+          fromFloor: floor,
+          fromLocation: 'kitchen',
+          toFloor: floor,
+          toLocation: String(guestRoom),
+          requestId: null,
+          orderId,
+          deadline: null,
+        });
+        set(s => ({
+          roomServiceOrders: [...s.roomServiceOrders, { id: orderId, guestRoom, floor, items, total, taskId, placedAt: Date.now(), updatedAt: null }],
+        }));
+        return orderId;
+      },
+
+      updateRoomServiceOrder(orderId, items, total) {
+        const order = get().roomServiceOrders.find(o => o.id === orderId);
+        if (!order) return;
+        const itemStr = items.map(i => `${i.qty}× ${i.name}`).join(', ');
+        const label = `Room ${order.guestRoom} — Room Service (Updated): ${itemStr} · $${total.toFixed(2)}`;
+        set(s => ({
+          roomServiceOrders: s.roomServiceOrders.map(o =>
+            o.id === orderId ? { ...o, items, total, updatedAt: Date.now() } : o
+          ),
+          tasks: s.tasks.map(t => t.id === order.taskId ? { ...t, label } : t),
+        }));
       },
 
       // ─── Guest Requests ───────────────────────────────────────────────────
@@ -374,20 +413,22 @@ export const useStore = create(
       setGuestRoom: (room) => set({ guestRoom: room }),
 
       resetGuestRoom(roomId) {
-        const { requests, tasks } = get();
+        const { requests, tasks, roomServiceOrders } = get();
         const roomRequests = requests.filter(r => r.guestRoom === roomId);
         const roomRequestIds = new Set(roomRequests.map(r => r.id));
-        const roomTasks = tasks.filter(t => roomRequestIds.has(t.requestId));
+        const roomRsTaskIds = new Set(roomServiceOrders.filter(o => o.guestRoom === roomId).map(o => o.taskId));
+        const roomTasks = tasks.filter(t => roomRequestIds.has(t.requestId) || roomRsTaskIds.has(t.id));
         const affectedUnitIds = new Set(roomTasks.flatMap(t => t.supplyUnitIds || []));
 
         set(s => ({
           requests: s.requests.filter(r => r.guestRoom !== roomId),
-          tasks: s.tasks.filter(t => !roomRequestIds.has(t.requestId)),
+          tasks: s.tasks.filter(t => !roomRequestIds.has(t.requestId) && !roomRsTaskIds.has(t.id)),
           supplyUnits: s.supplyUnits.map(u =>
             affectedUnitIds.has(u.id)
               ? { ...u, status: 'available', location: 'closet' }
               : u
           ),
+          roomServiceOrders: s.roomServiceOrders.filter(o => o.guestRoom !== roomId),
         }));
       },
       setMapFloor: (floor) => set({ currentMapFloor: floor }),
