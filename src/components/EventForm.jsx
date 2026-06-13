@@ -10,7 +10,8 @@ const empty = {
   bufferHours: 3, floorStart: 1, floorEnd: 1, roomStart: 1, roomEnd: 10,
 };
 
-const inputCls = 'w-full bg-lance-elevated rounded-lg px-3 py-2 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none focus:ring-1 focus:ring-lance-accent transition-colors';
+const inputCls = 'w-full rounded-lg px-3 py-2 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none focus:border-lance-accent focus:ring-1 focus:ring-lance-accent/20 transition-colors';
+const inputStyle = { background: '#232b2f', border: '1px solid rgba(255,255,255,0.1)' };
 const selectCls = inputCls;
 
 function deriveFormFromEvent(event) {
@@ -71,20 +72,20 @@ export default function EventForm({ onClose, initialData, onSave }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-xs font-semibold text-lance-text-sub mb-1">Event Name *</label>
-        <input className={inputCls} placeholder="e.g. Johnson Wedding"
+        <input className={inputCls} style={inputStyle} placeholder="e.g. Johnson Wedding"
           value={form.name} onChange={e => set('name', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Event Type</label>
-          <select className={selectCls} value={form.type} onChange={e => set('type', e.target.value)}>
+          <select className={selectCls} style={inputStyle} value={form.type} onChange={e => set('type', e.target.value)}>
             {EVENT_TYPES.map(t => <option key={t}>{t}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Deploy Buffer</label>
-          <select className={selectCls} value={form.bufferHours} onChange={e => set('bufferHours', e.target.value)}>
+          <select className={selectCls} style={inputStyle} value={form.bufferHours} onChange={e => set('bufferHours', e.target.value)}>
             {[1,2,3,4,5,6].map(h => <option key={h} value={h}>{h}h before</option>)}
           </select>
         </div>
@@ -93,11 +94,11 @@ export default function EventForm({ onClose, initialData, onSave }) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Date</label>
-          <input type="date" className={inputCls} value={form.date} onChange={e => set('date', e.target.value)} />
+          <input type="date" className={inputCls} style={inputStyle} value={form.date} onChange={e => set('date', e.target.value)} />
         </div>
         <div>
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Start Time</label>
-          <input type="time" className={inputCls} value={form.startTime} onChange={e => set('startTime', e.target.value)} />
+          <input type="time" className={inputCls} style={inputStyle} value={form.startTime} onChange={e => set('startTime', e.target.value)} />
         </div>
       </div>
 
@@ -106,13 +107,13 @@ export default function EventForm({ onClose, initialData, onSave }) {
         <div className="grid grid-cols-2 gap-3 mb-2">
           <div>
             <label className="block text-[10px] text-lance-text-sub mb-0.5">Floor start</label>
-            <select className={selectCls} value={form.floorStart} onChange={e => set('floorStart', e.target.value)}>
+            <select className={selectCls} style={inputStyle} value={form.floorStart} onChange={e => set('floorStart', e.target.value)}>
               {FLOORS.map(f => <option key={f} value={f}>Floor {f}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-[10px] text-lance-text-sub mb-0.5">Floor end</label>
-            <select className={selectCls} value={form.floorEnd} onChange={e => set('floorEnd', e.target.value)}>
+            <select className={selectCls} style={inputStyle} value={form.floorEnd} onChange={e => set('floorEnd', e.target.value)}>
               {FLOORS.map(f => <option key={f} value={f}>Floor {f}</option>)}
             </select>
           </div>
@@ -120,12 +121,12 @@ export default function EventForm({ onClose, initialData, onSave }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-[10px] text-lance-text-sub mb-0.5">Room start (1–20)</label>
-            <input type="number" min={1} max={20} className={inputCls}
+            <input type="number" min={1} max={20} className={inputCls} style={inputStyle}
               value={form.roomStart} onChange={e => set('roomStart', e.target.value)} />
           </div>
           <div>
             <label className="block text-[10px] text-lance-text-sub mb-0.5">Room end (1–20)</label>
-            <input type="number" min={1} max={20} className={inputCls}
+            <input type="number" min={1} max={20} className={inputCls} style={inputStyle}
               value={form.roomEnd} onChange={e => set('roomEnd', e.target.value)} />
           </div>
         </div>
