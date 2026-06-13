@@ -11,6 +11,7 @@ function SupplyRow({ type, floor }) {
 
   const floorUnits = supplyUnits.filter(u => u.typeId === type.id && u.floor === floor);
   const available = floorUnits.filter(u => u.status === 'available').length;
+  const pendingTransit = floorUnits.filter(u => u.status === 'pending_transit').length;
   const inTransit = floorUnits.filter(u => u.status === 'in_transit').length;
   const checkedOut = floorUnits.filter(u => u.status === 'checked_out').length;
   const total = floorUnits.length;
@@ -23,10 +24,11 @@ function SupplyRow({ type, floor }) {
           <div>
             <p className="text-sm font-medium text-lance-text">{type.name}</p>
             <div className="flex gap-2 text-[10px] mt-0.5">
-              {available > 0  && <span className="text-lance-accent">{available} avail</span>}
-              {inTransit > 0  && <span className="text-lance-gold-lt">{inTransit} in transit</span>}
-              {checkedOut > 0 && <span className="text-blue-400">{checkedOut} with guest</span>}
-              {total === 0    && <span className="text-lance-text-sub">none on this floor</span>}
+              {available > 0      && <span className="text-lance-accent">{available} avail</span>}
+              {pendingTransit > 0 && <span className="text-lance-text-sub">{pendingTransit} pending transit</span>}
+              {inTransit > 0      && <span className="text-lance-gold-lt">{inTransit} in transit</span>}
+              {checkedOut > 0     && <span className="text-blue-400">{checkedOut} with guest</span>}
+              {total === 0        && <span className="text-lance-text-sub">none on this floor</span>}
             </div>
           </div>
         </div>

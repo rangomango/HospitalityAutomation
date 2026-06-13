@@ -80,6 +80,12 @@ export const useStore = create(
           requests: task?.type === 'deliver' && task?.requestId
             ? s.requests.map(r => r.id === task.requestId ? { ...r, status: 'assigned' } : r)
             : s.requests,
+          // Upgrade units from pending_transit → in_transit when employee accepts
+          supplyUnits: s.supplyUnits.map(u =>
+            (task?.supplyUnitIds || []).includes(u.id) && u.status === 'pending_transit'
+              ? { ...u, status: 'in_transit' }
+              : u
+          ),
         }));
       },
       completeTask(taskId) {
@@ -152,9 +158,8 @@ export const useStore = create(
               deadline: plan.deadline,
               requestId: null,
             });
-            // Keep units on source floor — floor only updates when task is completed.
-            // This keeps per-floor totals stable until staff physically moves the items.
-            units.forEach(u => get()._updateUnit(u.id, { status: 'in_transit' }));
+            // Mark pending_transit until an employee accepts the task (→ in_transit).
+            units.forEach(u => get()._updateUnit(u.id, { status: 'pending_transit' }));
           });
           tasksCreated++;
 
@@ -259,7 +264,7 @@ export const useStore = create(
           deadline: null,
         });
 
-        if (unit) get()._updateUnit(unit.id, { status: 'in_transit' });
+        if (unit) get()._updateUnit(unit.id, { status: 'pending_transit' });
         set(s => ({ requests: [...s.requests, { ...request, taskId }] }));
         return { reqId, taskId };
       },

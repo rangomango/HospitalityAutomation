@@ -256,9 +256,10 @@ export default function FloorMap() {
       <div className="mt-3">
         <p className="text-xs font-semibold text-lance-text-sub mb-2">Floor {floor} Closet Inventory</p>
         {SUPPLY_TYPES.map(type => {
-          const count    = closetUnits.filter(u => u.typeId === type.id).length;
-          const inRooms  = floorUnits.filter(u => u.location !== 'closet' && u.typeId === type.id).length;
-          const incoming = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
+          const count          = closetUnits.filter(u => u.typeId === type.id).length;
+          const inRooms        = floorUnits.filter(u => u.location !== 'closet' && u.typeId === type.id).length;
+          const pendingTransit = floorUnits.filter(u => u.status === 'pending_transit' && u.typeId === type.id).length;
+          const inTransit      = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
           return (
             <div key={type.id} className="flex items-center justify-between py-1.5">
               <span className="text-sm text-lance-text flex items-center gap-1.5">
@@ -266,8 +267,9 @@ export default function FloorMap() {
               </span>
               <div className="flex gap-3 text-xs">
                 <span className="text-lance-accent font-semibold">{count} in closet</span>
-                {incoming > 0 && <span className="text-lance-gold-lt">{incoming} in transit</span>}
-                {inRooms > 0  && <span className="text-blue-400">{inRooms} in rooms</span>}
+                {pendingTransit > 0 && <span className="text-lance-text-sub">{pendingTransit} pending transit</span>}
+                {inTransit > 0      && <span className="text-lance-gold-lt">{inTransit} in transit</span>}
+                {inRooms > 0        && <span className="text-blue-400">{inRooms} in rooms</span>}
               </div>
             </div>
           );
