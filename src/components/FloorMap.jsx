@@ -89,9 +89,13 @@ function Room({ roomNum, floor, x, y, isEvent, suppliesHere, eventShortName }) {
 
 function Closet({ x, y, h, units }) {
   const countByType = {};
-  units.forEach(u => { countByType[u.typeId] = (countByType[u.typeId] || 0) + 1; });
+  const pendingSet = new Set();
+  units.forEach(u => {
+    countByType[u.typeId] = (countByType[u.typeId] || 0) + 1;
+    if (u.status === 'pending_transit') pendingSet.add(u.typeId);
+  });
   const types = Object.entries(countByType);
-  const COL_W = CLOSET_W / 2; // 21px per column
+  const COL_W = CLOSET_W / 2;
 
   return (
     <g>
@@ -101,9 +105,11 @@ function Closet({ x, y, h, units }) {
         CLOSET
       </text>
       {types.slice(0, 6).map(([typeId, count], i) => {
-        const col  = i % 2;
-        const row  = Math.floor(i / 2);
-        const cx   = x + COL_W * col + COL_W / 2;   // center of column
+        const isPending = pendingSet.has(typeId);
+        const iconColor = isPending ? C.goldLt : C.accent;
+        const col     = i % 2;
+        const row     = Math.floor(i / 2);
+        const cx      = x + COL_W * col + COL_W / 2;
         const iconTop = y + 18 + row * 26;
         return (
           <g key={typeId}>
@@ -112,11 +118,10 @@ function Closet({ x, y, h, units }) {
               x={cx - CLOSET_ICON / 2}
               y={iconTop}
               size={CLOSET_ICON}
-              color={C.accent}
+              color={iconColor}
             />
-            {/* count: extra gap below icon for readability */}
             <text x={cx} y={iconTop + CLOSET_ICON + 7} textAnchor="middle"
-              fontSize="7" fontWeight="700" fill={C.text}>
+              fontSize="7" fontWeight="700" fill={isPending ? C.goldLt : C.text}>
               {count}
             </text>
           </g>
@@ -133,6 +138,8 @@ function Closet({ x, y, h, units }) {
 
 export default function FloorMap() {
   const { currentMapFloor, events, supplyUnits, tasks, setMapFloor } = useStore();
+  const getDeployPlan = useStore(s => s.getDeployPlan);
+  const deployPlan = getDeployPlan();
   const floor = currentMapFloor;
 
   const eventRoomIds = new Set(events.flatMap(e => e.rooms || []));
@@ -141,7 +148,8 @@ export default function FloorMap() {
     roomToEventShort[r] = e.name.substring(0, 5);
   }));
   const floorUnits = supplyUnits.filter(u => u.floor === floor);
-  const closetUnits = floorUnits.filter(u => u.location === 'closet' && u.status === 'available');
+  // pending_transit units are still physically in the closet (task not yet accepted); in_transit units have been picked up
+  const closetUnits = floorUnits.filter(u => u.location === 'closet' && (u.status === 'available' || u.status === 'pending_transit'));
   const unitsInRoom = (roomId) => floorUnits.filter(u => u.location === String(roomId) && u.status === 'checked_out');
 
   const closetX = LEFT_PAD + 10 * (ROOM_W + GAP) + 4;
@@ -280,6 +288,12 @@ export default function FloorMap() {
             const inTransit      = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
             const incPending     = incomingPending[type.id] || 0;
             const incTransit     = incomingTransit[type.id] || 0;
+            const totalPending   = pendingTransit + incPending;
+            const totalTransit   = inTransit + incTransit;
+            // Requested but nothing available to send (deploy plan has toSend > 0, canFulfill === 0)
+            const unavailable    = deployPlan.some(
+              p => p.toFloor === floor && p.typeId === type.id && p.toSend > 0 && p.canFulfill === 0
+            );
             return (
               <div key={type.id} className="flex items-center justify-between py-1.5">
                 <span className="text-sm text-lance-text flex items-center gap-1.5">
@@ -287,9 +301,10 @@ export default function FloorMap() {
                 </span>
                 <div className="flex gap-3 text-xs flex-wrap justify-end">
                   <span className="text-lance-accent font-semibold">{count} in closet</span>
-                  {(pendingTransit + incPending) > 0 && <span className="text-lance-text-sub">{pendingTransit + incPending} pending transit</span>}
-                  {(inTransit + incTransit) > 0      && <span className="text-lance-gold-lt">{inTransit + incTransit} in transit</span>}
-                  {inRooms > 0                        && <span className="text-blue-400">{inRooms} in rooms</span>}
+                  {unavailable && totalPending === 0 && <span style={{ color: '#f87171' }}>requested but unavailable</span>}
+                  {totalPending > 0 && <span className="text-lance-text-sub">{totalPending} pending transit</span>}
+                  {totalTransit > 0 && <span className="text-lance-gold-lt">{totalTransit} in transit</span>}
+                  {inRooms > 0      && <span className="text-blue-400">{inRooms} in rooms</span>}
                 </div>
               </div>
             );
