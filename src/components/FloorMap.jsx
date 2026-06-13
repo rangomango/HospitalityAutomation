@@ -132,7 +132,7 @@ function Closet({ x, y, h, units }) {
 }
 
 export default function FloorMap() {
-  const { currentMapFloor, events, supplyUnits, setMapFloor } = useStore();
+  const { currentMapFloor, events, supplyUnits, tasks, setMapFloor } = useStore();
   const floor = currentMapFloor;
 
   const eventRoomIds = new Set(events.flatMap(e => e.rooms || []));
@@ -255,25 +255,46 @@ export default function FloorMap() {
       {/* Closet inventory summary */}
       <div className="mt-3">
         <p className="text-xs font-semibold text-lance-text-sub mb-2">Floor {floor} Closet Inventory</p>
-        {SUPPLY_TYPES.map(type => {
-          const count          = closetUnits.filter(u => u.typeId === type.id).length;
-          const inRooms        = floorUnits.filter(u => u.location !== 'closet' && u.typeId === type.id).length;
-          const pendingTransit = floorUnits.filter(u => u.status === 'pending_transit' && u.typeId === type.id).length;
-          const inTransit      = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
-          return (
-            <div key={type.id} className="flex items-center justify-between py-1.5">
-              <span className="text-sm text-lance-text flex items-center gap-1.5">
-                <SupplyIcon typeId={type.id} size={15} className="text-lance-accent" /> {type.name}
-              </span>
-              <div className="flex gap-3 text-xs">
-                <span className="text-lance-accent font-semibold">{count} in closet</span>
-                {pendingTransit > 0 && <span className="text-lance-text-sub">{pendingTransit} pending transit</span>}
-                {inTransit > 0      && <span className="text-lance-gold-lt">{inTransit} in transit</span>}
-                {inRooms > 0        && <span className="text-blue-400">{inRooms} in rooms</span>}
+        {(() => {
+          // Count units incoming TO this floor from active forward_deploy tasks
+          const incomingPending = {};
+          const incomingTransit = {};
+          tasks
+            .filter(t => t.type === 'forward_deploy' && t.toFloor === floor && (t.status === 'pending' || t.status === 'accepted'))
+            .forEach(t => {
+              (t.supplyUnitIds || []).forEach(unitId => {
+                const unit = supplyUnits.find(u => u.id === unitId);
+                if (!unit) return;
+                if (t.status === 'pending') {
+                  incomingPending[unit.typeId] = (incomingPending[unit.typeId] || 0) + 1;
+                } else {
+                  incomingTransit[unit.typeId] = (incomingTransit[unit.typeId] || 0) + 1;
+                }
+              });
+            });
+
+          return SUPPLY_TYPES.map(type => {
+            const count          = closetUnits.filter(u => u.typeId === type.id).length;
+            const inRooms        = floorUnits.filter(u => u.location !== 'closet' && u.typeId === type.id).length;
+            const pendingTransit = floorUnits.filter(u => u.status === 'pending_transit' && u.typeId === type.id).length;
+            const inTransit      = floorUnits.filter(u => u.status === 'in_transit' && u.typeId === type.id).length;
+            const incPending     = incomingPending[type.id] || 0;
+            const incTransit     = incomingTransit[type.id] || 0;
+            return (
+              <div key={type.id} className="flex items-center justify-between py-1.5">
+                <span className="text-sm text-lance-text flex items-center gap-1.5">
+                  <SupplyIcon typeId={type.id} size={15} className="text-lance-accent" /> {type.name}
+                </span>
+                <div className="flex gap-3 text-xs flex-wrap justify-end">
+                  <span className="text-lance-accent font-semibold">{count} in closet</span>
+                  {(pendingTransit + incPending) > 0 && <span className="text-lance-text-sub">{pendingTransit + incPending} pending transit</span>}
+                  {(inTransit + incTransit) > 0      && <span className="text-lance-gold-lt">{inTransit + incTransit} in transit</span>}
+                  {inRooms > 0                        && <span className="text-blue-400">{inRooms} in rooms</span>}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          });
+        })()}
       </div>
     </div>
   );
