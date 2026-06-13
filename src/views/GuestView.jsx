@@ -1,10 +1,10 @@
-import { ArrowRight, ArrowLeft, Plus, Minus } from 'lucide-react';
-import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive, MdRoomService, MdExplore, MdRestaurant, MdLocalCafe, MdPark, MdMuseum, MdDirectionsWalk, MdOpenInNew } from 'react-icons/md';
+import { ArrowRight, ArrowLeft, Plus, Minus, Send } from 'lucide-react';
+import { MdHotel, MdAccessTime, MdLocalShipping, MdCheckCircle, MdNotificationsActive, MdRoomService, MdExplore, MdRestaurant, MdLocalCafe, MdPark, MdMuseum, MdDirectionsWalk, MdOpenInNew, MdChat } from 'react-icons/md';
 import { useStore } from '../store/useStore';
 import { SUPPLY_TYPES, SUPPLY_TYPE_MAP } from '../data/constants';
 import { SupplyIcon } from '../components/SupplyIcon';
 import { formatDistanceToNow } from 'date-fns';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const ROOM_SERVICE_MENU = [
   {
@@ -275,6 +275,114 @@ function RoomServiceView({ guestRoom, onClose }) {
   );
 }
 
+function ChatView({ guestRoom, onClose }) {
+  const [messages, setMessages] = useState([
+    {
+      id: 'welcome',
+      from: 'hotel',
+      text: `Welcome to the Claremont Resort & Spa! 🏨 How can we help you today?`,
+      time: Date.now(),
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const send = () => {
+    const text = input.trim();
+    if (!text) return;
+    const guestMsg = { id: `g-${Date.now()}`, from: 'guest', text, time: Date.now() };
+    setMessages(m => [...m, guestMsg]);
+    setInput('');
+    setTimeout(() => {
+      setMessages(m => [...m, {
+        id: `h-${Date.now()}`,
+        from: 'hotel',
+        text: "Thank you for reaching out! A member of our concierge team will respond shortly. Is there anything else we can help with?",
+        time: Date.now(),
+      }]);
+    }, 1200);
+  };
+
+  return (
+    <div className="absolute inset-0 z-10 flex flex-col" style={{ background: '#08090a' }}>
+      {/* Header */}
+      <div className="px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0 bg-lance-surface">
+        <button onClick={onClose} className="p-1.5 text-lance-text-sub hover:text-lance-text transition-colors">
+          <ArrowLeft size={18} />
+        </button>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(43,202,149,0.15)' }}>
+          <MdChat size={19} className="text-lance-accent" />
+        </div>
+        <div>
+          <h2 className="font-bold text-sm leading-tight text-lance-text">Hotel Concierge</h2>
+          <p className="text-[11px] text-lance-text-sub">Room {guestRoom} · Typically replies in minutes</p>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto scrollable px-4 py-4 flex flex-col gap-2">
+        {messages.map((msg, i) => {
+          const isGuest = msg.from === 'guest';
+          const showAvatar = !isGuest && (i === 0 || messages[i - 1]?.from === 'guest');
+          return (
+            <div key={msg.id} className={`flex items-end gap-2 ${isGuest ? 'justify-end' : 'justify-start'}`}>
+              {!isGuest && (
+                <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center mb-0.5 ${showAvatar ? 'opacity-100' : 'opacity-0'}`}
+                  style={{ background: 'rgba(43,202,149,0.15)' }}>
+                  <MdChat size={12} className="text-lance-accent" />
+                </div>
+              )}
+              <div
+                className="max-w-[72%] px-3.5 py-2.5 text-sm leading-snug"
+                style={isGuest ? {
+                  background: '#2BCA95',
+                  color: '#08090a',
+                  borderRadius: '18px 18px 4px 18px',
+                  fontWeight: 500,
+                } : {
+                  background: '#1e2528',
+                  color: '#ffffff',
+                  borderRadius: '18px 18px 18px 4px',
+                }}
+              >
+                {msg.text}
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input bar */}
+      <div className="px-3 py-3 flex items-center gap-2 flex-shrink-0 bg-lance-surface">
+        <input
+          type="text"
+          placeholder="Message…"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && send()}
+          className="flex-1 text-sm text-lance-text placeholder-lance-text-sub focus:outline-none px-4 py-2 rounded-full"
+          style={{ background: 'rgba(255,255,255,0.06)' }}
+        />
+        <button
+          onClick={send}
+          disabled={!input.trim()}
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
+          style={input.trim()
+            ? { background: '#2BCA95', color: '#08090a' }
+            : { background: 'rgba(0,0,0,0.25)', color: '#4a7068' }}
+        >
+          <Send size={15} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const LOCAL_GUIDE = [
   {
     category: 'Dining',
@@ -439,6 +547,7 @@ export default function GuestView({ onOpenSetup }) {
   const events = useStore(s => s.events);
   const [showRoomService, setShowRoomService] = useState(false);
   const [showLocalGuide, setShowLocalGuide] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   if (!guestRoom) return <RoomEntry />;
 
@@ -478,10 +587,20 @@ export default function GuestView({ onOpenSetup }) {
             </div>
           </div>
         )}
-        <div className="bg-lance-surface rounded-xl px-4 py-3">
-          <p className="text-xs text-lance-text-sub font-medium">Your Room</p>
-          <p className="text-xl font-bold text-lance-accent">{guestRoom}</p>
-          <p className="text-xs text-lance-text-sub">Floor {floor}</p>
+        <div className="bg-lance-surface rounded-xl px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-lance-text-sub font-medium">Your Room</p>
+            <p className="text-xl font-bold text-white">{guestRoom}</p>
+            <p className="text-xs text-lance-text-sub">Floor {floor}</p>
+          </div>
+          <button
+            onClick={() => setShowChat(true)}
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+            style={{ background: 'rgba(43,202,149,0.1)', color: '#2BCA95' }}
+            aria-label="Open chat"
+          >
+            <MdChat size={20} />
+          </button>
         </div>
       </div>
 
@@ -516,6 +635,9 @@ export default function GuestView({ onOpenSetup }) {
       )}
       {showLocalGuide && (
         <LocalGuideView onClose={() => setShowLocalGuide(false)} />
+      )}
+      {showChat && (
+        <ChatView guestRoom={guestRoom} onClose={() => setShowChat(false)} />
       )}
     </div>
   );
