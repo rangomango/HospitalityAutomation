@@ -91,7 +91,7 @@ export default function EventForm({ onClose, initialData, onSave }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-3">
         <div>
           <label className="block text-xs font-semibold text-lance-text-sub mb-1">Date</label>
           <input type="date" className={inputCls} style={inputStyle} value={form.date} onChange={e => set('date', e.target.value)} />
