@@ -164,7 +164,7 @@ export default function SetupView() {
             )}
 
             {events.length === 0 && !showForm && (
-              <div className="text-center py-10 text-lance-text-sub">
+              <div className="text-center py-10">
                 <CalendarDays size={36} className="mx-auto mb-2 opacity-30" />
                 <p className="text-sm">No events added yet</p>
                 <p className="text-xs mt-1 text-lance-text-sub">Tap "Add Event" to get started</p>

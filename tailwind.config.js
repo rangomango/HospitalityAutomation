@@ -7,8 +7,8 @@ export default {
         // Lance.live dark palette
         lance: {
           bg:           '#08090a',   // near-black page background
-          surface:      '#0e1c1f',   // card / panel
-          elevated:     '#152428',   // slightly lifted surface
+          surface:      '#121618',   // card / panel
+          elevated:     '#191e21',   // slightly lifted surface
           border:       '#2BCA9533',   // teal glow border  ~20% opacity
           'border-sub': '#2BCA951A',   // subtle teal glow ~10% opacity
           accent:       '#2BCA95',   // primary teal
@@ -19,7 +19,7 @@ export default {
           'gold-lt':    '#e8b254',   // lighter gold
           'gold-dim':   '#2e1e06',   // dark gold tint
           teal:         '#315F75',   // dark teal blue (secondary)
-          text:         '#eef4f2',   // primary text
+          text:         '#ffffff',   // primary text
           'text-md':    '#8ab4a8',   // secondary text
           'text-sub':   '#4a7068',   // very muted text
         },

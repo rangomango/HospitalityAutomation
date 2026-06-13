@@ -233,7 +233,7 @@ export default function StaffView() {
               </button>
             )}
             {activeTasks.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12 text-lance-text-sub">
+              <div className="flex flex-col items-center justify-center py-12">
                 <CheckCircle size={40} className="mb-3 opacity-20" />
                 <p className="text-sm">All clear — no active tasks</p>
               </div>
@@ -253,7 +253,7 @@ export default function StaffView() {
               </button>
             )}
             {completedTasks.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12 text-lance-text-sub">
+              <div className="flex flex-col items-center justify-center py-12">
                 <Clock size={40} className="mb-3 opacity-20" />
                 <p className="text-sm">No completed tasks yet</p>
               </div>
@@ -281,7 +281,7 @@ export default function StaffView() {
                     </div>
                   )}
                   {conflicts.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 text-lance-text-sub">
+                    <div className="flex flex-col items-center justify-center py-12">
                       <BellOff size={40} className="mb-3 opacity-20" />
                       <p className="text-sm">No shortage alerts</p>
                     </div>

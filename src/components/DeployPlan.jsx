@@ -15,10 +15,10 @@ export default function DeployPlan() {
 
   if (!events.length) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center text-lance-text-sub">
+      <div className="flex flex-col items-center justify-center py-12 text-center">
         <Truck size={40} className="mb-3 opacity-20" />
         <p className="text-sm font-medium">No events set up yet</p>
-        <p className="text-xs mt-1">Add events in the Events tab first</p>
+        <p className="text-xs mt-1 text-lance-text-sub">Add events in the Events tab first</p>
       </div>
     );
   }
