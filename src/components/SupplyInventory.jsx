@@ -63,7 +63,7 @@ export default function SupplyInventory() {
     <div>
       {/* Global totals */}
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold text-lance-text-sub uppercase tracking-wide">Total Inventory</p>
+        <p className="text-[10px] font-bold text-lance-accent uppercase tracking-widest">Total Inventory</p>
         {supplyUnits.length > 0 && (
           <button onClick={clearInventory} className="text-xs text-red-400 font-semibold">
             Reset all
@@ -117,7 +117,7 @@ export default function SupplyInventory() {
 
       {/* Personal Care */}
       <div>
-        <p className="text-[10px] font-bold text-lance-accent-lt uppercase tracking-widest mb-2">Personal Care</p>
+        <p className="text-[10px] font-bold text-lance-accent uppercase tracking-widest mb-2">Personal Care</p>
         <div className="bg-lance-surface rounded-xl px-3">
           {SUPPLY_TYPES.filter(t => t.category === 'personal_care').map(type => (
             <SupplyRow key={type.id} type={type} floor={selectedFloor} />
